@@ -39,7 +39,7 @@ func TestCalculateReview_ThirdCorrectResponse(t *testing.T) {
 		EaseFactor:  2.5,
 		Interval:    6,
 	}
-	grade := 4
+	grade := 5
 
 	newStats := CalculateReview(currentStats, grade)
 
@@ -51,5 +51,18 @@ func TestCalculateReview_ThirdCorrectResponse(t *testing.T) {
 	}
 	if newStats.EaseFactor == 2.5 {
 		t.Errorf("EaseFactor should have updated")
+	}
+}
+func TestCalculateReview_IncorrectResponse(t *testing.T) {
+	currentStats := CardStats{Repetitions: 10, EaseFactor: 2.9, Interval: 100}
+	grade := 0 // Forgot completely
+
+	newStats := CalculateReview(currentStats, grade)
+
+	if newStats.Repetitions != 0 {
+		t.Errorf("Expected Repetitions reset to 0,but got %d", newStats.Repetitions)
+	}
+	if newStats.Interval != 1 {
+		t.Errorf("Expected Interval reset to 1,but got %d", newStats.Interval)
 	}
 }
