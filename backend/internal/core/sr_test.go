@@ -2,7 +2,7 @@ package core
 
 import "testing"
 
-func TestCalculateReview(t *testing.T) {
+func TestCalculateReview_InitialCorrectResponse(t *testing.T) {
 	currentStats := CardStats{
 		Repetitions: 0,
 		EaseFactor:  2.5,
@@ -17,5 +17,19 @@ func TestCalculateReview(t *testing.T) {
 	}
 	if newStats.Interval != 1 {
 		t.Errorf("Expected Interval 1, but got %d", newStats.Interval)
+	}
+}
+
+func TestCalculateReview_SecondCorrectResponse(t *testing.T) {
+	currentStats := CardStats{Repetitions: 1, EaseFactor: 2.5, Interval: 1}
+	grade := 4
+
+	newStats := CalculateReview(currentStats, grade)
+
+	if newStats.Repetitions != 2 {
+		t.Errorf("Expected Repetitions 2,but got %d", newStats.Repetitions)
+	}
+	if newStats.Interval != 6 {
+		t.Errorf("Expected Interval 6,but got %d", newStats.Interval)
 	}
 }
