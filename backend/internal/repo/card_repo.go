@@ -63,3 +63,10 @@ func (r *PostgresCardRepo) GetCardByID(id uint) (*core.Card, error) {
 
 	return card, nil
 }
+func (r *PostgresCardRepo) ListDueCards(limit int) (*[]core.Card, error) {
+
+}
+
+func (r *PostgresCardRepo) UpdateCard(card *core.Card) error {
+
+}

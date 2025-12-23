@@ -58,3 +58,42 @@ func TestCreateAndGetCard(t *testing.T) {
 		t.Errorf("Expected EF 2.5, got %f", fetchedCard.Stats.EaseFactor)
 	}
 }
+
+func TestListDueCards(t *testing.T) {
+	// 1. Arrange
+	db := SetupTestDB(t)
+	repo := NewCardRepo(db)
+
+	// Create a "New" card (Interval 0).
+	// Since Interval is 0, (Now + 0) <= Now is TRUE. It should be due immediately.
+	card := &core.Card{
+		Front: "Due Card",
+		Back:  "Answer",
+		Stats: core.InitialStats(), // Interval = 0
+	}
+	repo.CreateCard(card)
+
+	// Create a "Future" card (Interval 100 days)
+	// (Now + 100 days) <= Now is FALSE. It should NOT be due.
+	futureCard := &core.Card{
+		Front: "Future Card",
+		Back:  "Answer",
+		Stats: core.CardStats{Interval: 100, Repetitions: 5, EaseFactor: 2.5},
+	}
+	repo.CreateCard(futureCard)
+
+	// 2. Act
+	dueCards, err := repo.ListDueCards(10)
+	if err != nil {
+		t.Fatalf("Failed to list cards: %v", err)
+	}
+
+	// 3. Assert
+	if len(dueCards) != 1 {
+		t.Errorf("Expected 1 due card, got %d", len(dueCards))
+	}
+
+	if len(dueCards) > 0 && dueCards[0].Front != "Due Card" {
+		t.Errorf("Expected 'Due Card', got '%s'", dueCards[0].Front)
+	}
+}
