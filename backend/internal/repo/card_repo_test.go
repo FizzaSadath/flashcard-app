@@ -90,3 +90,44 @@ func TestListDueCards(t *testing.T) {
 		t.Errorf("Expected 'Due Card', got '%s'", dueCards[0].Front)
 	}
 }
+
+func TestUpdateCard(t *testing.T) {
+
+	db := SetupTestDB(t)
+	repo := NewCardRepo(db)
+	//initial stats
+	card := &core.Card{
+		Front: "Original Front",
+		Back:  "Original Back",
+		Stats: core.InitialStats(),
+	}
+
+	if err := repo.CreateCard(card); err != nil {
+		t.Fatalf("Failed to create initial card: %v", err)
+	}
+
+	//updated stats
+	card.Front = "Updated Front"
+	card.Stats.Repetitions = 5
+	card.Stats.Interval = 10
+
+	err := repo.UpdateCard(card)
+	if err != nil {
+		t.Fatalf("Failed to update card: %v", err)
+	}
+
+	updatedCard, err := repo.GetCardByID(card.ID)
+	if err != nil {
+		t.Fatalf("Failed to get updated card: %v", err)
+	}
+
+	if updatedCard.Front != "Updated Front" {
+		t.Errorf("Front text did not update. Got %s", updatedCard.Front)
+	}
+	if updatedCard.Stats.Repetitions != 5 {
+		t.Errorf("Repetitions did not update. Got %d", updatedCard.Stats.Repetitions)
+	}
+	if updatedCard.Stats.Interval != 10 {
+		t.Errorf("Interval did not update. Got %d", updatedCard.Stats.Interval)
+	}
+}
