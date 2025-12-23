@@ -3,8 +3,8 @@ package core
 import "time"
 
 type Card struct {
-	ID        string
-	DeckID    string
+	ID        uint
+	DeckID    uint
 	Front     string
 	Back      string
 	Stats     CardStats
