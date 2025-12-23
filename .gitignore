@@ -1,2 +1,3 @@
 .env
 backend/internal/core/coverage.out
+backend/internal/repo/coverage.out

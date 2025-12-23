@@ -60,12 +60,9 @@ func TestCreateAndGetCard(t *testing.T) {
 }
 
 func TestListDueCards(t *testing.T) {
-	// 1. Arrange
 	db := SetupTestDB(t)
 	repo := NewCardRepo(db)
 
-	// Create a "New" card (Interval 0).
-	// Since Interval is 0, (Now + 0) <= Now is TRUE. It should be due immediately.
 	card := &core.Card{
 		Front: "Due Card",
 		Back:  "Answer",
@@ -73,8 +70,6 @@ func TestListDueCards(t *testing.T) {
 	}
 	repo.CreateCard(card)
 
-	// Create a "Future" card (Interval 100 days)
-	// (Now + 100 days) <= Now is FALSE. It should NOT be due.
 	futureCard := &core.Card{
 		Front: "Future Card",
 		Back:  "Answer",
@@ -82,13 +77,11 @@ func TestListDueCards(t *testing.T) {
 	}
 	repo.CreateCard(futureCard)
 
-	// 2. Act
 	dueCards, err := repo.ListDueCards(10)
 	if err != nil {
 		t.Fatalf("Failed to list cards: %v", err)
 	}
 
-	// 3. Assert
 	if len(dueCards) != 1 {
 		t.Errorf("Expected 1 due card, got %d", len(dueCards))
 	}
