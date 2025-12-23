@@ -94,5 +94,23 @@ func (r *PostgresCardRepo) ListDueCards(limit int) ([]core.Card, error) {
 }
 
 func (r *PostgresCardRepo) UpdateCard(card *core.Card) error {
-	return nil
+
+	if card.ID == 0 {
+		return errors.New("cannot update card without ID")
+	}
+
+	entity := CardEntity{
+		DeckID:      card.DeckID,
+		Front:       card.Front,
+		Back:        card.Back,
+		Repetitions: card.Stats.Repetitions,
+		EaseFactor:  card.Stats.EaseFactor,
+		Interval:    card.Stats.Interval,
+	}
+	entity.ID = card.ID
+	entity.CreatedAt = card.CreatedAt
+
+	result := r.db.Save(&entity)
+
+	return result.Error
 }
