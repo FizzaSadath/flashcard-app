@@ -1,0 +1,60 @@
+package repo
+
+import (
+	"testing"
+
+	"github.com/FizzaSadath/flashcard-app-backend/internal/core"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+func SetupTestDB(t *testing.T) *gorm.DB {
+
+	dsn := "host=localhost user=flash_user password=flash_password dbname=flashcard_db port=5432 sslmode=disable"
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("Failed to connect to test DB: %v", err)
+	}
+
+	err = db.AutoMigrate(&CardEntity{})
+	if err != nil {
+		t.Fatalf("Failed to migrate: %v", err)
+	}
+
+	db.Exec("DELETE FROM cards")
+
+	return db
+}
+
+func TestCreateAndGetCard(t *testing.T) {
+	db := SetupTestDB(t)
+	repo := NewCardRepo(db)
+
+	originalCard := &core.Card{
+		Front: "What is TDD?",
+		Back:  "Test Driven Development",
+		Stats: core.InitialStats(),
+	}
+
+	err := repo.CreateCard(originalCard)
+	if err != nil {
+		t.Fatalf("Failed to create card: %v", err)
+	}
+
+	if originalCard.ID == 0 {
+		t.Error("Card ID should not be 0 after saving")
+	}
+
+	fetchedCard, err := repo.GetCardByID(originalCard.ID)
+	if err != nil {
+		t.Fatalf("Failed to get card: %v", err)
+	}
+
+	if fetchedCard.Front != "What is TDD?" {
+		t.Errorf("Expected 'What is TDD?', got '%s'", fetchedCard.Front)
+	}
+	if fetchedCard.Stats.EaseFactor != 2.5 {
+		t.Errorf("Expected EF 2.5, got %f", fetchedCard.Stats.EaseFactor)
+	}
+}

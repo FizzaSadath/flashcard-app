@@ -66,3 +66,18 @@ func TestCalculateReview_IncorrectResponse(t *testing.T) {
 		t.Errorf("Expected Interval reset to 1,but got %d", newStats.Interval)
 	}
 }
+
+func TestCalculateReview_EaseFactorBelowThreshold(t *testing.T) {
+	currentStats := CardStats{
+		Repetitions: 3,
+		EaseFactor:  1.5,
+		Interval:    10,
+	}
+	grade := 0
+
+	newStats := CalculateReview(currentStats, grade)
+
+	if newStats.EaseFactor != 1.3 {
+		t.Errorf("Expected EaseFactor to be 1.3, but got %f", newStats.EaseFactor)
+	}
+}
