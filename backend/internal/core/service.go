@@ -49,3 +49,8 @@ func (s *CardService) ReviewCard(cardID uint, grade int) error {
 func (s *CardService) ListDueCards(limit int) ([]Card, error) {
 	return s.repo.ListDueCards(limit)
 }
+
+// ListCards lists all cards, latest first
+func (s *CardService) ListCards() ([]Card, error) {
+	return s.repo.ListCards()
+}
