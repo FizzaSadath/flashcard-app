@@ -8,3 +8,8 @@ type CardRepository interface {
 	UpdateCard(card *Card) error
 	ListCards() ([]Card, error)
 }
+
+type UserRepository interface {
+	CreateUser(user *User) error
+	GetUserByEmail(email string) (*User, error)
+}

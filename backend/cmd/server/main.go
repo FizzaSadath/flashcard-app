@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// 1. Configuration
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system vars")
 	}
@@ -25,23 +24,18 @@ func main() {
 		SSLMode:  "disable",
 	}
 
-	// 2. Infrastructure (Database)
 	db, err := repo.NewDatabase(dbConfig)
 	if err != nil {
 		log.Fatalf("Database initialization failed: %v", err)
 	}
-	db.AutoMigrate(&repo.CardEntity{})
+	db.AutoMigrate(&repo.UserEntity{}, &repo.CardEntity{})
 
-	// 3. Dependency Injection (The Wiring)
-	// Repo -> Service -> Handler -> Router
 	cardRepo := repo.NewCardRepo(db)
 	cardService := core.NewCardService(cardRepo)
 	cardHandler := api.NewCardHandler(cardService)
 
-	// 4. Setup Router (Clean!)
 	router := api.SetupRouter(cardHandler)
 
-	// 5. Start Server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

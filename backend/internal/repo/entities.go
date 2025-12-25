@@ -4,8 +4,22 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserEntity struct {
+	gorm.Model
+
+	Email    string `gorm:"uniqueIndex;not null"`
+	Password string `gorm:"not null"`
+}
+
+func (UserEntity) TableName() string {
+	return "users"
+}
+
 type CardEntity struct {
 	gorm.Model
+
+	UserID uint       `gorm:"index"`
+	User   UserEntity `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	DeckID uint   `gorm:"index"`
 	Front  string `gorm:"type:text;not null"`

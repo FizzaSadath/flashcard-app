@@ -24,3 +24,9 @@ func InitialStats() CardStats {
 		Interval:    0,
 	}
 }
+
+type User struct {
+	ID       uint
+	Email    string
+	Password string
+}
