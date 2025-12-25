@@ -114,3 +114,20 @@ func (r *PostgresCardRepo) UpdateCard(card *core.Card) error {
 
 	return result.Error
 }
+func (r *PostgresCardRepo) ListCards() ([]core.Card, error) {
+	var entities []CardEntity
+	result := r.db.Order("created_at DESC").Find(&entities)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var cards []core.Card
+	for _, e := range entities {
+		cards = append(cards, core.Card{
+			ID: e.ID, DeckID: e.DeckID, Front: e.Front, Back: e.Back,
+			Stats:     core.CardStats{Repetitions: e.Repetitions, EaseFactor: e.EaseFactor, Interval: e.Interval},
+			CreatedAt: e.CreatedAt,
+		})
+	}
+	return cards, nil
+}

@@ -8,6 +8,14 @@ github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:45.25,46
 github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:46.54,48.4 1 0
 github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:49.3,49.27 1 0
 github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:51.2,64.18 2 1
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:66.73,73.25 4 1
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:73.25,75.3 1 0
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:77.2,78.29 2 1
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:78.29,91.3 1 1
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:93.2,93.19 1 1
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:96.62,98.18 1 1
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:98.18,100.3 1 0
+github.com/FizzaSadath/flashcard-app-backend/internal/repo/card_repo.go:102.2,115.21 5 1
 github.com/FizzaSadath/flashcard-app-backend/internal/repo/db.go:19.48,25.16 3 0
 github.com/FizzaSadath/flashcard-app-backend/internal/repo/db.go:25.16,27.3 1 0
 github.com/FizzaSadath/flashcard-app-backend/internal/repo/db.go:29.2,29.16 1 0

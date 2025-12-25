@@ -1,21 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
+	"github.com/FizzaSadath/flashcard-app-backend/internal/api"
+	"github.com/FizzaSadath/flashcard-app-backend/internal/core"
 	"github.com/FizzaSadath/flashcard-app-backend/internal/repo"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No .env file found, relying on system environment variables")
+	// 1. Configuration
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system vars")
 	}
 
-	cfg := repo.Config{
+	dbConfig := repo.Config{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
 		User:     os.Getenv("DB_USER"),
@@ -24,17 +25,29 @@ func main() {
 		SSLMode:  "disable",
 	}
 
-	db, err := repo.NewDatabase(cfg)
+	// 2. Infrastructure (Database)
+	db, err := repo.NewDatabase(dbConfig)
 	if err != nil {
-		log.Fatalf("Could not connect to database: %v", err)
+		log.Fatalf("Database initialization failed: %v", err)
 	}
-
-	fmt.Println("Successfully connected to the database!")
-
-	sqlDB, _ := db.DB()
-	if err := sqlDB.Ping(); err != nil {
-		log.Fatalf("Database ping failed: %v", err)
-	}
-
 	db.AutoMigrate(&repo.CardEntity{})
+
+	// 3. Dependency Injection (The Wiring)
+	// Repo -> Service -> Handler -> Router
+	cardRepo := repo.NewCardRepo(db)
+	cardService := core.NewCardService(cardRepo)
+	cardHandler := api.NewCardHandler(cardService)
+
+	// 4. Setup Router (Clean!)
+	router := api.SetupRouter(cardHandler)
+
+	// 5. Start Server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Server starting on port %s...", port)
+	if err := router.Run(":" + port); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
