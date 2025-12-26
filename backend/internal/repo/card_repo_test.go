@@ -21,8 +21,8 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		t.Fatalf("Failed to migrate: %v", err)
 	}
 
-	db.Exec("DELETE FROM decks")
 	db.Exec("DELETE FROM cards")
+	db.Exec("DELETE FROM decks")
 	db.Exec("DELETE FROM users")
 
 	return db
@@ -37,14 +37,24 @@ func createTestUser(db *gorm.DB) uint {
 	return user.ID
 }
 
+func createTestDeck(db *gorm.DB, userID uint) uint {
+	deck := DeckEntity{
+		UserID: userID,
+		Name:   "Test Deck",
+	}
+	db.Create(&deck)
+	return deck.ID
+}
 func TestCreateAndGetCard(t *testing.T) {
 	db := SetupTestDB(t)
 	repo := NewCardRepo(db)
 
 	userID := createTestUser(db)
+	deckID := createTestDeck(db, userID)
 
 	originalCard := &core.Card{
 		UserID: userID,
+		DeckID: deckID,
 		Front:  "What is TDD?",
 		Back:   "Test Driven Development",
 		Stats:  core.InitialStats(),
@@ -74,9 +84,11 @@ func TestListDueCards(t *testing.T) {
 	repo := NewCardRepo(db)
 
 	userID := createTestUser(db)
+	deckID := createTestDeck(db, userID)
 
 	card := &core.Card{
 		UserID: userID,
+		DeckID: deckID,
 		Front:  "Due Card",
 		Back:   "Answer",
 		Stats:  core.InitialStats(),
@@ -110,9 +122,11 @@ func TestUpdateCard(t *testing.T) {
 	repo := NewCardRepo(db)
 
 	userID := createTestUser(db)
+	deckID := createTestDeck(db, userID)
 
 	card := &core.Card{
 		UserID: userID,
+		DeckID: deckID,
 		Front:  "Original Front",
 		Back:   "Original Back",
 		Stats:  core.InitialStats(),

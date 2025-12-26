@@ -14,8 +14,21 @@ func NewDeckRepo(db *gorm.DB) core.DeckRepository {
 }
 
 func (r *PostgresDeckRepo) CreateDeck(deck *core.Deck) error {
+	entity := DeckEntity{
+		UserID: deck.UserID,
+		Name:   deck.Name,
+	}
+
+	result := r.db.Create(&entity)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	deck.ID = entity.ID
+	deck.CreatedAt = entity.CreatedAt
 	return nil
 }
+
 func (r *PostgresDeckRepo) ListDecks(userID uint) ([]core.Deck, error) {
 	return nil, nil
 }
