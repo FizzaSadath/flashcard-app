@@ -4,6 +4,7 @@ import "time"
 
 type Card struct {
 	ID        uint
+	UserID    uint
 	DeckID    uint
 	Front     string
 	Back      string
@@ -29,4 +30,11 @@ type User struct {
 	ID       uint
 	Email    string
 	Password string
+}
+
+type Deck struct {
+	ID        uint
+	UserID    uint
+	Name      string
+	CreatedAt time.Time
 }

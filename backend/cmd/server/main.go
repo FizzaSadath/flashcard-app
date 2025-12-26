@@ -31,10 +31,20 @@ func main() {
 	db.AutoMigrate(&repo.UserEntity{}, &repo.CardEntity{})
 
 	cardRepo := repo.NewCardRepo(db)
-	cardService := core.NewCardService(cardRepo)
-	cardHandler := api.NewCardHandler(cardService)
+	userRepo := repo.NewUserRepo(db)
 
-	router := api.SetupRouter(cardHandler)
+	cardService := core.NewCardService(cardRepo)
+
+		jwtSecret := os.Getenv("JWT_SECRET")
+		if jwtSecret == "" {
+			jwtSecret = "super-secret-key-87$4%1@*7"
+		}
+		authService := core.NewAuthService(userRepo, jwtSecret)
+
+	cardHandler := api.NewCardHandler(cardService)
+	authHandler := api.NewAuthHandler(authService)
+
+	router := api.SetupRouter(cardHandler, authHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

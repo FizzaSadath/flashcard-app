@@ -33,7 +33,7 @@ func (s *AuthService) Register(email, password string) error {
 
 	user := &User{
 		Email:    email,
-		Password: string(hashedBytes), // Save the HASH, not the password
+		Password: string(hashedBytes), // save hashed password
 	}
 
 	return s.userRepo.CreateUser(user)

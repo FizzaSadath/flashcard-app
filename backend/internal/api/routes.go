@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(cardHandler *CardHandler) *gin.Engine {
+func SetupRouter(cardHandler *CardHandler, authHandler *AuthHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -25,8 +25,22 @@ func SetupRouter(cardHandler *CardHandler) *gin.Engine {
 
 	api := r.Group("/api")
 	{
-		api.POST("/cards", cardHandler.CreateCard)
-		api.POST("/cards/review", cardHandler.ReviewCard)
+		// Auth Routes
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", authHandler.Register)
+			auth.POST("/login", authHandler.Login)
+		}
+
+		// Card Routes
+		protected := api.Group("/")
+		protected.Use(AuthMiddleware())
+		{
+			protected.POST("/cards", cardHandler.CreateCard)
+			protected.GET("/cards", cardHandler.ListCards)
+			protected.GET("/cards/due", cardHandler.ListDueCards)
+			protected.POST("/cards/review", cardHandler.ReviewCard)
+		}
 	}
 
 	return r

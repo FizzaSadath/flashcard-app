@@ -19,6 +19,7 @@ func NewCardRepo(db *gorm.DB) core.CardRepository {
 
 func (r *PostgresCardRepo) CreateCard(card *core.Card) error {
 	entity := CardEntity{
+		UserID:      card.UserID,
 		DeckID:      card.DeckID,
 		Front:       card.Front,
 		Back:        card.Back,
@@ -50,6 +51,7 @@ func (r *PostgresCardRepo) GetCardByID(id uint) (*core.Card, error) {
 	}
 	card := &core.Card{
 		ID:     entity.ID,
+		UserID: entity.UserID,
 		DeckID: entity.DeckID,
 		Front:  entity.Front,
 		Back:   entity.Back,
@@ -63,11 +65,11 @@ func (r *PostgresCardRepo) GetCardByID(id uint) (*core.Card, error) {
 
 	return card, nil
 }
-func (r *PostgresCardRepo) ListDueCards(limit int) ([]core.Card, error) {
+func (r *PostgresCardRepo) ListDueCards(userID uint, limit int) ([]core.Card, error) {
 	var entities []CardEntity
 
-	query := r.db.Where("updated_at + make_interval(days => \"interval\"::int) <= NOW()")
-
+	query := r.db.Where("user_id = ?", userID).
+		Where("updated_at + make_interval(days => \"interval\"::int) <= NOW()")
 	result := query.Order("updated_at ASC").Limit(limit).Find(&entities)
 
 	if result.Error != nil {
@@ -78,6 +80,7 @@ func (r *PostgresCardRepo) ListDueCards(limit int) ([]core.Card, error) {
 	for _, e := range entities {
 		cards = append(cards, core.Card{
 			ID:     e.ID,
+			UserID: e.UserID,
 			DeckID: e.DeckID,
 			Front:  e.Front,
 			Back:   e.Back,
@@ -101,6 +104,7 @@ func (r *PostgresCardRepo) UpdateCard(card *core.Card) error {
 
 	entity := CardEntity{
 		DeckID:      card.DeckID,
+		UserID:      card.UserID,
 		Front:       card.Front,
 		Back:        card.Back,
 		Repetitions: card.Stats.Repetitions,
@@ -114,9 +118,10 @@ func (r *PostgresCardRepo) UpdateCard(card *core.Card) error {
 
 	return result.Error
 }
-func (r *PostgresCardRepo) ListCards() ([]core.Card, error) {
+func (r *PostgresCardRepo) ListCards(userID uint) ([]core.Card, error) {
 	var entities []CardEntity
-	result := r.db.Order("created_at DESC").Find(&entities)
+	result := r.db.Where("user_id = ?", userID).
+		Order("created_at DESC").Find(&entities)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -124,7 +129,7 @@ func (r *PostgresCardRepo) ListCards() ([]core.Card, error) {
 	var cards []core.Card
 	for _, e := range entities {
 		cards = append(cards, core.Card{
-			ID: e.ID, DeckID: e.DeckID, Front: e.Front, Back: e.Back,
+			ID: e.ID, UserID: e.UserID, DeckID: e.DeckID, Front: e.Front, Back: e.Back,
 			Stats:     core.CardStats{Repetitions: e.Repetitions, EaseFactor: e.EaseFactor, Interval: e.Interval},
 			CreatedAt: e.CreatedAt,
 		})
