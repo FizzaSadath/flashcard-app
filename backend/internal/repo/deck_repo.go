@@ -49,8 +49,13 @@ func (r *PostgresDeckRepo) ListDecks(userID uint) ([]core.Deck, error) {
 	return decks, nil
 }
 func (r *PostgresDeckRepo) DeleteDeck(deckID uint) error {
-	return nil
+	return r.db.Delete(&DeckEntity{}, deckID).Error
 }
+
 func (r *PostgresDeckRepo) GetDeckByID(deckID uint) (*core.Deck, error) {
-	return nil, nil
+	var entity DeckEntity
+	if err := r.db.First(&entity, deckID).Error; err != nil {
+		return nil, err
+	}
+	return &core.Deck{ID: entity.ID, UserID: entity.UserID, Name: entity.Name}, nil
 }
