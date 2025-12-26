@@ -28,23 +28,25 @@ func main() {
 	if err != nil {
 		log.Fatalf("Database initialization failed: %v", err)
 	}
-	db.AutoMigrate(&repo.UserEntity{}, &repo.CardEntity{})
+	db.AutoMigrate(&repo.UserEntity{}, &repo.DeckEntity{}, &repo.CardEntity{})
 
 	cardRepo := repo.NewCardRepo(db)
 	userRepo := repo.NewUserRepo(db)
+	deckRepo := repo.NewDeckRepo(db)
 
-	cardService := core.NewCardService(cardRepo)
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "super-secret-key-87$4%1@*7"
+	}
+	authService := core.NewAuthService(userRepo, jwtSecret)
+	deckService := core.NewDeckService(deckRepo)
+	cardService := core.NewCardService(cardRepo, deckRepo)
 
-		jwtSecret := os.Getenv("JWT_SECRET")
-		if jwtSecret == "" {
-			jwtSecret = "super-secret-key-87$4%1@*7"
-		}
-		authService := core.NewAuthService(userRepo, jwtSecret)
-
-	cardHandler := api.NewCardHandler(cardService)
 	authHandler := api.NewAuthHandler(authService)
+	deckHandler := api.NewDeckHandler(deckService)
+	cardHandler := api.NewCardHandler(cardService)
 
-	router := api.SetupRouter(cardHandler, authHandler)
+	router := api.SetupRouter(cardHandler, authHandler, deckHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

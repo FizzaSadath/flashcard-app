@@ -21,8 +21,9 @@ func getUserID(c *gin.Context) uint {
 
 func (h *CardHandler) CreateCard(c *gin.Context) {
 	var req struct {
-		Front string `json:"front" binding:"required"`
-		Back  string `json:"back" binding:"required"`
+		Front  string `json:"front" binding:"required"`
+		Back   string `json:"back" binding:"required"`
+		DeckID uint   `json:"deck_id" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -32,7 +33,7 @@ func (h *CardHandler) CreateCard(c *gin.Context) {
 
 	userID := getUserID(c)
 
-	card, err := h.service.CreateCard(userID, req.Front, req.Back)
+	card, err := h.service.CreateCard(userID, req.DeckID, req.Front, req.Back)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

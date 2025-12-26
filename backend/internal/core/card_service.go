@@ -3,19 +3,21 @@ package core
 import "errors"
 
 type CardService struct {
-	repo CardRepository
+	repo     CardRepository
+	deckRepo DeckRepository
 }
 
-func NewCardService(repo CardRepository) *CardService {
+func NewCardService(repo CardRepository, deckRepo DeckRepository) *CardService {
 	return &CardService{
-		repo: repo,
+		repo:     repo,
+		deckRepo: deckRepo,
 	}
 }
 
-func (s *CardService) CreateCard(userID uint, front, back string) (*Card, error) {
+func (s *CardService) CreateCard(userID uint, deckID uint, front, back string) (*Card, error) {
 	newCard := &Card{
 		UserID: userID,
-		DeckID: 0,
+		DeckID: deckID,
 		Front:  front,
 		Back:   back,
 		Stats:  InitialStats(),

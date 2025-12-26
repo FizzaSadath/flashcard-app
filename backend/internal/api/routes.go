@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(cardHandler *CardHandler, authHandler *AuthHandler) *gin.Engine {
+func SetupRouter(cardHandler *CardHandler, authHandler *AuthHandler, deckHandler *DeckHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -36,6 +36,10 @@ func SetupRouter(cardHandler *CardHandler, authHandler *AuthHandler) *gin.Engine
 		protected := api.Group("/")
 		protected.Use(AuthMiddleware())
 		{
+			protected.POST("/decks", deckHandler.CreateDeck)
+			protected.GET("/decks", deckHandler.ListDecks)
+			protected.DELETE("/decks/:id", deckHandler.DeleteDeck)
+
 			protected.POST("/cards", cardHandler.CreateCard)
 			protected.GET("/cards", cardHandler.ListCards)
 			protected.GET("/cards/due", cardHandler.ListDueCards)
