@@ -52,3 +52,22 @@ func TestListDecks_Isolation(t *testing.T) {
 		t.Errorf("Unexpected deck name: %s", decks[0].Name)
 	}
 }
+
+func TestDeleteDeck(t *testing.T) {
+	db := SetupTestDB(t)
+	repo := NewDeckRepo(db)
+
+	userID := createTestUser(db)
+	deck := &core.Deck{UserID: userID, Name: "To Delete"}
+	repo.CreateDeck(deck)
+
+	err := repo.DeleteDeck(deck.ID)
+	if err != nil {
+		t.Fatalf("Failed to delete deck: %v", err)
+	}
+
+	decks, _ := repo.ListDecks(userID)
+	if len(decks) != 0 {
+		t.Errorf("Deck was not deleted, count: %d", len(decks))
+	}
+}
