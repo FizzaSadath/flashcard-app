@@ -16,11 +16,12 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		t.Fatalf("Failed to connect to test DB: %v", err)
 	}
 
-	err = db.AutoMigrate(&UserEntity{}, &CardEntity{})
+	err = db.AutoMigrate(&UserEntity{}, &DeckEntity{}, &CardEntity{})
 	if err != nil {
 		t.Fatalf("Failed to migrate: %v", err)
 	}
 
+	db.Exec("DELETE FROM decks")
 	db.Exec("DELETE FROM cards")
 	db.Exec("DELETE FROM users")
 

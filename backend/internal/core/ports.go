@@ -13,3 +13,10 @@ type UserRepository interface {
 	CreateUser(user *User) error
 	GetUserByEmail(email string) (*User, error)
 }
+
+type DeckRepository interface{
+	CreateDeck(deck *Deck) error
+	ListDecks(userID uint) ([]Deck, error)
+	DeleteDeck(deckID uint) error
+	GetDeckByID(deckID uint) (*Deck, error) 
+}
