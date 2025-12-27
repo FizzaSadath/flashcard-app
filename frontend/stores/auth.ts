@@ -1,9 +1,44 @@
 import { defineStore } from "pinia";
 
+function parseJwt(token: string) {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const parts = token.split(".");
+
+    if (parts.length < 2) {
+      return null;
+    }
+
+    const base64Url = parts[1];
+
+    if (!base64Url) {
+      return null;
+    }
+
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 export const useAuthStore = defineStore("auth", () => {
-  // Loads cookies from browser
   const token = useCookie<string | null>("token");
-  const user = useState("user", () => null);
+
+  const user = computed(() => {
+    if (!token.value) return null;
+    return parseJwt(token.value);
+  });
 
   const isAuthenticated = computed(() => !!token.value);
 
@@ -23,7 +58,6 @@ export const useAuthStore = defineStore("auth", () => {
         throw new Error(error.value.data?.error || "Login failed");
       }
 
-      // Save token to cookie
       const response = data.value as any;
       token.value = response.token;
 
@@ -58,7 +92,6 @@ export const useAuthStore = defineStore("auth", () => {
 
   function logout() {
     token.value = null;
-    user.value = null;
     return navigateTo("/login");
   }
 
