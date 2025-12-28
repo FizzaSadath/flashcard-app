@@ -57,3 +57,7 @@ func (s *CardService) ListDueCards(userID uint, limit int) ([]Card, error) {
 func (s *CardService) ListCards(userID uint) ([]Card, error) {
 	return s.repo.ListCards(userID)
 }
+
+func (s *CardService) GetStats(userID uint) (*UserStats, error) {
+	return s.repo.GetUserStats(userID)
+}

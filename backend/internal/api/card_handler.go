@@ -87,3 +87,13 @@ func (h *CardHandler) ListDueCards(c *gin.Context) {
 
 	c.JSON(http.StatusOK, cards)
 }
+
+func (h *CardHandler) GetStats(c *gin.Context) {
+	userID := getUserID(c)
+	stats, err := h.service.GetStats(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch stats"})
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
