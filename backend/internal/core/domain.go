@@ -43,3 +43,11 @@ type Deck struct {
 type Stats struct {
 	ID uint
 }
+
+type UserStats struct {
+	TotalCards    int64
+	CardsDue      int64
+	NewCards      int64 // Interval = 0
+	LearningCards int64 // Interval 1-21
+	MatureCards   int64 // Interval > 21
+}

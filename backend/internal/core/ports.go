@@ -7,6 +7,7 @@ type CardRepository interface {
 	ListDueCards(userID uint, limit int) ([]Card, error)
 	ListCards(userID uint) ([]Card, error)
 	UpdateCard(card *Card) error
+	GetUserStats(userID uint) (*UserStats, error)
 }
 
 type UserRepository interface {
