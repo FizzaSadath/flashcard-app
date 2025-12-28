@@ -31,6 +31,12 @@ async function deleteDeck(id: number) {
     <header>
       <h1>My Decks</h1>
       <p>Logged in as user: {{ authStore.user?.username || "Unknown" }}</p>
+      <NuxtLink
+        to="/stats"
+        class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-bold"
+      >
+        View Stats
+      </NuxtLink>
       <button @click="authStore.logout()">Logout</button>
     </header>
 
