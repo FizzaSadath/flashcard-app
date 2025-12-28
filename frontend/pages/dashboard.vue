@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from "~/stores/auth";
 
-const authStore = useAuthStore()
-const newDeckName = ref('')
+const authStore = useAuthStore();
+const newDeckName = ref("");
 
-const { data: decks, refresh, error } = await useAPI<any[]>('/decks')
+const { data: decks, refresh, error } = await useAPI<any[]>("/decks");
 
 async function createDeck() {
-  if (!newDeckName.value) return
+  if (!newDeckName.value) return;
 
-  await useAPI('/decks', {
-    method: 'POST',
-    body: { name: newDeckName.value }
-  })
+  await useAPI("/decks", {
+    method: "POST",
+    body: { name: newDeckName.value },
+  });
 
-  newDeckName.value = ''
-  refresh() 
+  newDeckName.value = "";
+  refresh();
 }
 
 async function deleteDeck(id: number) {
-  if (!confirm('Are you sure?')) return
+  if (!confirm("Are you sure?")) return;
 
-  await useAPI(`/decks/${id}`, { method: 'DELETE' })
-  refresh()
+  await useAPI(`/decks/${id}`, { method: "DELETE" });
+  refresh();
 }
 </script>
 
@@ -30,7 +30,7 @@ async function deleteDeck(id: number) {
   <div>
     <header>
       <h1>My Decks</h1>
-      <p>Logged in as user: {{ authStore.user?.email || 'Unknown' }}</p>
+      <p>Logged in as user: {{ authStore.user?.username || "Unknown" }}</p>
       <button @click="authStore.logout()">Logout</button>
     </header>
 
@@ -39,17 +39,17 @@ async function deleteDeck(id: number) {
     <section>
       <h2>Create New Deck</h2>
       <form @submit.prevent="createDeck">
-        <input 
-          v-model="newDeckName" 
-          type="text" 
-          placeholder="Enter deck name" 
-          required 
+        <input
+          v-model="newDeckName"
+          type="text"
+          placeholder="Enter deck name"
+          required
         />
         <button type="submit">Add Deck</button>
       </form>
     </section>
 
-    <div v-if="error" style="color: red;">
+    <div v-if="error" style="color: red">
       Error loading decks: {{ error.message }}
     </div>
 
@@ -58,11 +58,15 @@ async function deleteDeck(id: number) {
         <ul>
           <li v-for="deck in decks" :key="deck.ID">
             <h3>{{ deck.Name }}</h3>
-            <small>Created: {{ new Date(deck.CreatedAt).toLocaleDateString() }}</small>
-            
+            <small
+              >Created:
+              {{ new Date(deck.CreatedAt).toLocaleDateString() }}</small
+            >
+
             <div>
               <button @click="deleteDeck(deck.ID)">Delete</button>
               <NuxtLink :to="`/decks/${deck.ID}`">Open Deck</NuxtLink>
+              <NuxtLink :to="`/study/${deck.ID}`"> Study Now </NuxtLink>
             </div>
           </li>
         </ul>

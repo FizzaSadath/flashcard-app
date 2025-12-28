@@ -29,6 +29,7 @@ func InitialStats() CardStats {
 type User struct {
 	ID       uint
 	Email    string
+	Username string
 	Password string
 }
 
@@ -37,4 +38,8 @@ type Deck struct {
 	UserID    uint
 	Name      string
 	CreatedAt time.Time
+}
+
+type Stats struct {
+	ID uint
 }

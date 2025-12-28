@@ -67,7 +67,12 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  async function register(email: string, password: string) {
+  async function register(
+    email: string,
+    username: string,
+    password: string,
+    confirmPassword: string
+  ) {
     const config = useRuntimeConfig();
 
     try {
@@ -75,7 +80,7 @@ export const useAuthStore = defineStore("auth", () => {
         `${config.public.apiBase}/auth/register`,
         {
           method: "POST",
-          body: { email, password },
+          body: { email, username, password, confirmPassword },
         }
       );
 

@@ -17,6 +17,7 @@ func NewUserRepo(db *gorm.DB) core.UserRepository {
 
 func (r *PostgresUserRepo) CreateUser(user *core.User) error {
 	entity := UserEntity{
+		Username: user.Username,
 		Email:    user.Email,
 		Password: user.Password,
 	}
@@ -44,6 +45,26 @@ func (r *PostgresUserRepo) GetUserByEmail(email string) (*core.User, error) {
 	return &core.User{
 		ID:       entity.ID,
 		Email:    entity.Email,
+		Username: entity.Username,
+		Password: entity.Password,
+	}, nil
+}
+
+func (r *PostgresUserRepo) GetUserByUsername(username string) (*core.User, error) {
+	var entity UserEntity
+
+	result := r.db.Where("username = ?", username).First(&entity)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user not found")
+		}
+		return nil, result.Error
+	}
+
+	return &core.User{
+		ID:       entity.ID,
+		Email:    entity.Email,
+		Username: entity.Username,
 		Password: entity.Password,
 	}, nil
 }

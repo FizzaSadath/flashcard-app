@@ -8,6 +8,7 @@ type UserEntity struct {
 	gorm.Model
 
 	Email    string `gorm:"uniqueIndex;not null"`
+	Username string `gorm:"not null"`
 	Password string `gorm:"not null"`
 }
 
@@ -47,4 +48,12 @@ type CardEntity struct {
 
 func (CardEntity) TableName() string {
 	return "cards"
+}
+
+type StatsEntity struct {
+	gorm.Model
+}
+
+func (StatsEntity) TableName() string {
+	return "stats"
 }

@@ -19,15 +19,21 @@ type AuthRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
+type RegRequest struct {
+	Email           string `json:"email" binding:"required,email"`
+	Username        string `json:"username" binding:"required,min=3"`
+	Password        string `json:"password" binding:"required,min=6"`
+	ConfirmPassword string `json:"confirmPassword" binding:"required,min=6"`
+}
 
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req AuthRequest
+	var req RegRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.service.Register(req.Email, req.Password)
+	err := h.service.Register(req.Email, req.Username, req.Password, req.ConfirmPassword)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

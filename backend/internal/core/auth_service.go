@@ -20,23 +20,33 @@ func NewAuthService(repo UserRepository, secret string) *AuthService {
 	}
 }
 
-func (s *AuthService) Register(email, password string) error {
-	existing, _ := s.userRepo.GetUserByEmail(email)
-	if existing != nil {
+func (s *AuthService) Register(email, username, password, confirmPassword string) error {
+
+	existingEmail, _ := s.userRepo.GetUserByEmail(email)
+	if existingEmail != nil {
 		return errors.New("email already registered")
 	}
-
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	if err != nil {
-		return err
+	existingUser, _ := s.userRepo.GetUserByUsername(username)
+	if existingUser != nil {
+		return errors.New("username is already taken")
 	}
+	if password == confirmPassword {
 
-	user := &User{
-		Email:    email,
-		Password: string(hashedBytes), // save hashed password
+		hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+		if err != nil {
+			return err
+		}
+
+		user := &User{
+			Email:    email,
+			Username: username,
+			Password: string(hashedBytes), // save hashed password
+		}
+
+		return s.userRepo.CreateUser(user)
+	} else {
+		return errors.New("passwords didn't match")
 	}
-
-	return s.userRepo.CreateUser(user)
 }
 
 func (s *AuthService) Login(email, password string) (string, error) {
@@ -51,9 +61,10 @@ func (s *AuthService) Login(email, password string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"email":   user.Email,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(), // Valid for 3 days
+		"user_id":  user.ID,
+		"email":    user.Email,
+		"username": user.Username,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(), // Valid for 3 days
 	})
 
 	tokenString, err := token.SignedString(s.jwtSecret)
