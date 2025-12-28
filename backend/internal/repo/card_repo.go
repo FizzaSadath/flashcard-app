@@ -136,3 +136,30 @@ func (r *PostgresCardRepo) ListCards(userID uint) ([]core.Card, error) {
 	}
 	return cards, nil
 }
+
+func (r *PostgresCardRepo) GetUserStats(userID uint) (*core.UserStats, error) {
+	stats := &core.UserStats{}
+
+	// Total Cards
+	if err := r.db.Model(&CardEntity{}).Where("user_id = ?", userID).Count(&stats.TotalCards).Error; err != nil {
+		return nil, err
+	}
+
+	//  Due Cards
+	if err := r.db.Model(&CardEntity{}).Where("user_id = ?", userID).
+		Where("updated_at + make_interval(days => \"interval\"::int) <= NOW()").
+		Count(&stats.CardsDue).Error; err != nil {
+		return nil, err
+	}
+
+	// New Cards (Interval == 0)
+	r.db.Model(&CardEntity{}).Where("user_id = ? AND \"interval\" = 0", userID).Count(&stats.NewCards)
+
+	// Learning Cards (Interval > 0 AND <= 21)
+	r.db.Model(&CardEntity{}).Where("user_id = ? AND \"interval\" > 0 AND \"interval\" <= 21", userID).Count(&stats.LearningCards)
+
+	// Mature Cards (Interval > 21)
+	r.db.Model(&CardEntity{}).Where("user_id = ? AND \"interval\" > 21", userID).Count(&stats.MatureCards)
+
+	return stats, nil
+}
