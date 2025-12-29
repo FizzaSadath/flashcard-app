@@ -45,6 +45,7 @@ func SetupRouter(cardHandler *CardHandler, authHandler *AuthHandler, deckHandler
 			protected.GET("/cards/due", cardHandler.ListDueCards)
 			protected.POST("/cards/review", cardHandler.ReviewCard)
 			protected.GET("/stats", cardHandler.GetStats)
+			protected.GET("/stats/decks", cardHandler.GetDeckStats)
 		}
 	}
 

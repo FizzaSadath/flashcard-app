@@ -97,3 +97,13 @@ func (h *CardHandler) GetStats(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, stats)
 }
+
+func (h *CardHandler) GetDeckStats(c *gin.Context) {
+	userID := getUserID(c)
+	stats, err := h.service.GetDeckStats(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
