@@ -51,3 +51,13 @@ type UserStats struct {
 	LearningCards int64 // Interval 1-21
 	MatureCards   int64 // Interval > 21
 }
+
+type DeckStat struct {
+	DeckID   uint
+	DeckName string
+	Total    int
+	Due      int
+	New      int
+	Learning int // Interval 1-21
+	Mature   int // Interval > 21
+}
