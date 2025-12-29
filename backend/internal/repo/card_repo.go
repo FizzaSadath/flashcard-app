@@ -164,3 +164,28 @@ func (r *PostgresCardRepo) GetUserStats(userID uint) (*core.UserStats, error) {
 	return stats, nil
 }
 
+func (r *PostgresCardRepo) GetDeckStats(userID uint) ([]core.DeckStat, error) {
+	var results []core.DeckStat
+
+	query := `
+		SELECT 
+			d.id as deck_id,
+			d.name as deck_name,
+			COUNT(c.id) as total,
+			SUM(CASE WHEN c.updated_at + make_interval(days => c.interval::int) <= NOW() THEN 1 ELSE 0 END) as due,
+			SUM(CASE WHEN c.interval = 0 THEN 1 ELSE 0 END) as new,
+			SUM(CASE WHEN c.interval > 0 AND c.interval <= 21 THEN 1 ELSE 0 END) as learning,
+			SUM(CASE WHEN c.interval > 21 THEN 1 ELSE 0 END) as mature
+		FROM decks d
+		LEFT JOIN cards c ON d.id = c.deck_id
+		WHERE d.user_id = ? AND d.deleted_at IS NULL AND c.deleted_at IS NULL
+		GROUP BY d.id, d.name
+		ORDER BY d.name ASC
+	`
+
+	if err := r.db.Raw(query, userID).Scan(&results).Error; err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}

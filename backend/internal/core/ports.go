@@ -8,6 +8,7 @@ type CardRepository interface {
 	ListCards(userID uint) ([]Card, error)
 	UpdateCard(card *Card) error
 	GetUserStats(userID uint) (*UserStats, error)
+	GetDeckStats(userID uint) ([]DeckStat, error)
 }
 
 type UserRepository interface {
