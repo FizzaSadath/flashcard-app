@@ -5,11 +5,17 @@ export default defineNuxtConfig({
 
   modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
 
-  css: [],
+  css: ["~/assets/css/main.css"],
 
   runtimeConfig: {
     public: {
       apiBase: "http://localhost:8080/api",
+    },
+  },
+
+  app: {
+    head: {
+      title: "Flip | Flashcard Learning",
     },
   },
 });

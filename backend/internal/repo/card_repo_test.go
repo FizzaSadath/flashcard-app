@@ -154,3 +154,56 @@ func TestUpdateCard(t *testing.T) {
 		t.Errorf("Front text did not update. Got %s", updatedCard.Front)
 	}
 }
+
+func TestGetUserStats(t *testing.T) {
+	db := SetupTestDB(t)
+	repo := NewCardRepo(db)
+
+	userID := createTestUser(db)
+	deckID := createTestDeck(db, userID)
+
+	newCard := &core.Card{
+		UserID: userID, DeckID: deckID, Front: "New", Back: "A",
+		Stats: core.CardStats{Interval: 0},
+	}
+	repo.CreateCard(newCard)
+
+	learningCard := &core.Card{
+		UserID: userID, DeckID: deckID, Front: "Learning", Back: "A",
+		Stats: core.CardStats{Interval: 5},
+	}
+	repo.CreateCard(learningCard)
+
+	matureCard := &core.Card{
+		UserID: userID, DeckID: deckID, Front: "Mature", Back: "A",
+		Stats: core.CardStats{Interval: 30},
+	}
+	repo.CreateCard(matureCard)
+
+	db.Exec("UPDATE cards SET updated_at = NOW() - INTERVAL '31 days' WHERE id = ?", matureCard.ID)
+
+	stats, err := repo.GetUserStats(userID)
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+
+	if stats.TotalCards != 3 {
+		t.Errorf("Expected Total 3, but got %d", stats.TotalCards)
+	}
+
+	if stats.NewCards != 1 {
+		t.Errorf("Expected New 1, but got %d", stats.NewCards)
+	}
+
+	if stats.LearningCards != 1 {
+		t.Errorf("Expected Learning 1, but got %d", stats.LearningCards)
+	}
+
+	if stats.MatureCards != 1 {
+		t.Errorf("Expected Mature 1, but got %d", stats.MatureCards)
+	}
+
+	if stats.CardsDue != 2 {
+		t.Errorf("Expected Due 2, but got %d", stats.CardsDue)
+	}
+}
