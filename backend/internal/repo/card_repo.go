@@ -163,3 +163,4 @@ func (r *PostgresCardRepo) GetUserStats(userID uint) (*core.UserStats, error) {
 
 	return stats, nil
 }
+
