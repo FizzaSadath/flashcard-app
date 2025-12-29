@@ -4,9 +4,10 @@ import { Doughnut } from "vue-chartjs";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+// 1. Fetch both Global stats and Deck breakdown
 const { data: stats, pending } = await useAPI<any>("/stats");
+const { data: deckStats } = await useAPI<any[]>("/stats/decks");
 
-// Colors for the chart matching Tailwind classes
 const chartColors = {
   new: "#3B82F6", // Blue-500
   learning: "#F59E0B", // Amber-500
@@ -25,7 +26,7 @@ const chartData = computed(() => {
           chartColors.learning,
           chartColors.mature,
         ],
-        borderWidth: 0, // Cleaner look without borders
+        borderWidth: 0,
         hoverOffset: 4,
         data: [
           stats.value.NewCards,
@@ -42,14 +43,14 @@ const chartOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      display: false, // We build a custom legend HTML for better styling
+      display: false,
     },
     tooltip: {
-      backgroundColor: "rgba(17, 24, 39, 0.9)", // gray-900
+      backgroundColor: "rgba(17, 24, 39, 0.9)",
       padding: 12,
       cornerRadius: 8,
       titleColor: "#fff",
-      bodyColor: "#9CA3AF", // gray-400
+      bodyColor: "#9CA3AF",
     },
   },
 };
@@ -58,7 +59,6 @@ const chartOptions = {
 <template>
   <div class="min-h-[calc(100vh-6rem)] p-6 sm:p-10">
     <div class="mx-auto max-w-5xl">
-      <!-- Navigation -->
       <NuxtLink
         to="/dashboard"
         class="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors mb-8 group"
@@ -97,7 +97,6 @@ const chartOptions = {
       <div v-else class="space-y-8">
         <!-- Summary Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Total Cards Card -->
           <div
             class="relative overflow-hidden rounded-2xl border border-white/5 bg-gray-900/40 p-8 shadow-xl backdrop-blur-sm"
           >
@@ -127,7 +126,6 @@ const chartOptions = {
             </p>
           </div>
 
-          <!-- Due Today Card -->
           <div
             class="relative overflow-hidden rounded-2xl border border-white/5 bg-gray-900/40 p-8 shadow-xl backdrop-blur-sm"
           >
@@ -167,15 +165,12 @@ const chartOptions = {
           >
             Knowledge Distribution
           </h2>
-
           <div
             class="flex flex-col md:flex-row items-center justify-around gap-8"
           >
-            <!-- Chart Container -->
             <ClientOnly>
               <div class="relative h-64 w-64 md:h-80 md:w-80">
                 <Doughnut :data="chartData" :options="chartOptions" />
-                <!-- Center Text Overlay -->
                 <div
                   class="absolute inset-0 flex items-center justify-center pointer-events-none"
                 >
@@ -189,9 +184,8 @@ const chartOptions = {
               </div>
             </ClientOnly>
 
-            <!-- Custom Legend -->
             <div class="flex flex-col gap-4 w-full md:w-auto">
-              <!-- New -->
+              <!-- New Legend -->
               <div
                 class="flex items-center justify-between gap-12 p-3 rounded-lg bg-gray-800/50 border border-gray-700/50"
               >
@@ -205,8 +199,7 @@ const chartOptions = {
                   stats.NewCards
                 }}</span>
               </div>
-
-              <!-- Learning -->
+              <!-- Learning Legend -->
               <div
                 class="flex items-center justify-between gap-12 p-3 rounded-lg bg-gray-800/50 border border-gray-700/50"
               >
@@ -220,8 +213,7 @@ const chartOptions = {
                   stats.LearningCards
                 }}</span>
               </div>
-
-              <!-- Mature -->
+              <!-- Mature Legend -->
               <div
                 class="flex items-center justify-between gap-12 p-3 rounded-lg bg-gray-800/50 border border-gray-700/50"
               >
@@ -236,6 +228,82 @@ const chartOptions = {
                 }}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Deck Breakdown Table -->
+        <div
+          class="rounded-2xl border border-white/5 bg-gray-900/40 p-8 shadow-xl backdrop-blur-sm"
+        >
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            Deck Breakdown
+          </h2>
+
+          <div
+            class="overflow-hidden rounded-xl border border-white/10 shadow-lg"
+          >
+            <table class="w-full text-left text-sm text-gray-400">
+              <thead
+                class="bg-gray-800/80 text-gray-200 uppercase font-bold text-xs"
+              >
+                <tr>
+                  <th class="px-6 py-4">Deck Name</th>
+                  <th class="px-6 py-4 text-center text-blue-400">New</th>
+                  <th class="px-6 py-4 text-center text-amber-400">Learning</th>
+                  <th class="px-6 py-4 text-center text-emerald-400">Mature</th>
+                  <th
+                    class="px-6 py-4 text-center text-rose-400 font-extrabold bg-rose-500/5 border-l border-rose-500/10"
+                  >
+                    DUE
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                class="divide-y divide-gray-800 bg-gray-900/40 backdrop-blur-sm"
+              >
+                <!-- If no decks exist -->
+                <tr v-if="!deckStats || deckStats.length === 0">
+                  <td
+                    colspan="5"
+                    class="px-6 py-8 text-center text-gray-500 italic"
+                  >
+                    No decks found. Start studying to see stats!
+                  </td>
+                </tr>
+
+                <tr
+                  v-for="deck in deckStats"
+                  :key="deck.DeckID"
+                  class="hover:bg-white/5 transition-colors group"
+                >
+                  <td
+                    class="px-6 py-4 font-medium text-white group-hover:text-indigo-300 transition-colors"
+                  >
+                    {{ deck.DeckName }}
+                  </td>
+                  <td class="px-6 py-4 text-center font-mono">
+                    {{ deck.New }}
+                  </td>
+                  <td class="px-6 py-4 text-center font-mono">
+                    {{ deck.Learning }}
+                  </td>
+                  <td class="px-6 py-4 text-center font-mono">
+                    {{ deck.Mature }}
+                  </td>
+                  <td
+                    class="px-6 py-4 text-center border-l border-gray-800 group-hover:border-white/5 bg-gray-900/30"
+                  >
+                    <span
+                      v-if="deck.Due > 0"
+                      class="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-full bg-rose-500/10 text-rose-400 font-bold border border-rose-500/20 text-xs shadow-[0_0_10px_rgba(244,63,94,0.1)]"
+                    >
+                      {{ deck.Due }}
+                    </span>
+                    <span v-else class="text-gray-700">-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

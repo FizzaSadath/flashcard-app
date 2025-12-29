@@ -4,7 +4,25 @@ import { useAuthStore } from "~/stores/auth";
 const authStore = useAuthStore();
 const newDeckName = ref("");
 
-const { data: decks, refresh, error } = await useAPI<any[]>("/decks");
+const {
+  data: decks,
+  refresh: refreshDecks,
+  error,
+} = await useAPI<any[]>("/decks");
+const { data: deckStats, refresh: refreshStats } = await useAPI<any[]>(
+  "/stats/decks"
+);
+
+// Helper to find due count for a specific deck
+function getDueCount(deckId: number) {
+  if (!deckStats.value) return 0;
+  const stat = deckStats.value.find((s: any) => s.DeckID === deckId);
+  return stat ? stat.Due : 0;
+}
+
+async function refreshAll() {
+  await Promise.all([refreshDecks(), refreshStats()]);
+}
 
 async function createDeck() {
   if (!newDeckName.value) return;
@@ -15,7 +33,7 @@ async function createDeck() {
   });
 
   newDeckName.value = "";
-  refresh();
+  refreshAll(); // Refresh both lists
 }
 
 async function deleteDeck(id: number) {
@@ -27,7 +45,7 @@ async function deleteDeck(id: number) {
     return;
 
   await useAPI(`/decks/${id}`, { method: "DELETE" });
-  refresh();
+  refreshAll();
 }
 </script>
 
@@ -49,6 +67,7 @@ async function deleteDeck(id: number) {
         </div>
       </div>
 
+      <!-- Create Deck -->
       <div class="mb-12">
         <form @submit.prevent="createDeck" class="relative max-w-xl">
           <div class="relative group">
@@ -72,6 +91,7 @@ async function deleteDeck(id: number) {
         </form>
       </div>
 
+      <!-- Error message -->
       <div
         v-if="error"
         class="mb-8 flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-red-200"
@@ -91,6 +111,7 @@ async function deleteDeck(id: number) {
         Error loading decks: {{ error.message }}
       </div>
 
+      <!-- Deck grid -->
       <section>
         <div
           v-if="decks && decks.length > 0"
@@ -103,21 +124,40 @@ async function deleteDeck(id: number) {
           >
             <div>
               <div class="flex items-start justify-between">
-                <div class="rounded-lg bg-gray-700/50 p-3 text-indigo-400">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-6 h-6"
+                <div class="flex items-center gap-3">
+                  <!-- Deck Icon -->
+                  <div class="rounded-lg bg-gray-700/50 p-3 text-indigo-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="w-6 h-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
+                      />
+                    </svg>
+                  </div>
+
+                  <!-- NEW: Due Badge -->
+                  <div
+                    v-if="getDueCount(deck.ID) > 0"
+                    class="flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-bold text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.1)]"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
-                    />
-                  </svg>
+                    <span class="relative flex h-2 w-2">
+                      <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"
+                      ></span>
+                      <span
+                        class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"
+                      ></span>
+                    </span>
+                    {{ getDueCount(deck.ID) }} Due
+                  </div>
                 </div>
 
                 <button
@@ -154,7 +194,7 @@ async function deleteDeck(id: number) {
             <div class="mt-8 flex gap-3">
               <NuxtLink
                 :to="`/study/${deck.ID}`"
-                class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-500 hover:-translate-y-0.5"
+                class="relative flex-1 flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-500 hover:-translate-y-0.5"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -170,6 +210,19 @@ async function deleteDeck(id: number) {
                   />
                 </svg>
                 Study
+
+                <!-- NEW: Mini alert dot on button if due -->
+                <span
+                  v-if="getDueCount(deck.ID) > 0"
+                  class="absolute -top-1 -right-1 flex h-3 w-3"
+                >
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"
+                  ></span>
+                  <span
+                    class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"
+                  ></span>
+                </span>
               </NuxtLink>
 
               <NuxtLink
