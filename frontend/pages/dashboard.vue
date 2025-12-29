@@ -4,6 +4,8 @@ import { useAuthStore } from "~/stores/auth";
 const authStore = useAuthStore();
 const newDeckName = ref("");
 
+useHead({ title: "Dashboard - Flip" });
+
 const {
   data: decks,
   refresh: refreshDecks,

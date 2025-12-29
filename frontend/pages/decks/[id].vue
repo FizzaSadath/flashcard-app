@@ -5,6 +5,8 @@ const deckId = Number(route.params.id);
 const front = ref("");
 const back = ref("");
 
+useHead({ title: "My Decks - Flip" });
+
 const { data: decks } = await useAPI<any[]>("/decks");
 const currentDeck = computed(() =>
   decks.value?.find((d: any) => d.ID === deckId)

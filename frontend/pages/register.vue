@@ -8,13 +8,9 @@ const confirmPassword = ref("");
 const authStore = useAuthStore();
 const loading = ref(false);
 
-const handleRegister = async () => {
-  // Basic validation before calling store
-  if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match!");
-    return;
-  }
+useHead({ title: "Register - Flip" });
 
+const handleRegister = async () => {
   loading.value = true;
   await authStore.register(
     email.value,
@@ -27,10 +23,8 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <!-- Main Container -->
   <div class="flex flex-1 flex-col items-center justify-center px-4 py-12">
     <div class="w-full max-w-md">
-      <!-- Header -->
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
           Create an account
@@ -40,12 +34,10 @@ const handleRegister = async () => {
         </p>
       </div>
 
-      <!-- Glass Card -->
       <div
         class="rounded-2xl border border-white/10 bg-gray-900/50 p-8 shadow-2xl backdrop-blur-xl"
       >
         <form class="space-y-5" @submit.prevent="handleRegister">
-          <!-- Email -->
           <div class="space-y-1">
             <label for="email" class="block text-sm font-medium text-gray-300"
               >Email address</label
@@ -63,7 +55,6 @@ const handleRegister = async () => {
             </div>
           </div>
 
-          <!-- Username -->
           <div class="space-y-1">
             <label
               for="username"
@@ -78,12 +69,11 @@ const handleRegister = async () => {
                 type="text"
                 required
                 class="block w-full rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-500 transition-all focus:border-indigo-500 focus:bg-gray-800 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                placeholder="Unique username"
+                placeholder="username"
               />
             </div>
           </div>
 
-          <!-- Password -->
           <div class="space-y-1">
             <label
               for="password"
@@ -103,7 +93,6 @@ const handleRegister = async () => {
             </div>
           </div>
 
-          <!-- Confirm Password -->
           <div class="space-y-1">
             <label
               for="confirmPassword"
@@ -123,7 +112,6 @@ const handleRegister = async () => {
             </div>
           </div>
 
-          <!-- Submit Button -->
           <div class="pt-2">
             <button
               type="submit"
@@ -143,7 +131,6 @@ const handleRegister = async () => {
             </button>
           </div>
 
-          <!-- Login Link -->
           <div class="text-center text-sm">
             <p class="text-gray-500">
               Already registered?

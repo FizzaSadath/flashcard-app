@@ -8,6 +8,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const { data: stats, pending } = await useAPI<any>("/stats");
 const { data: deckStats } = await useAPI<any[]>("/stats/decks");
 
+useHead({ title: "Stats - Flip" });
+
 const chartColors = {
   new: "#3B82F6", // Blue-500
   learning: "#F59E0B", // Amber-500
