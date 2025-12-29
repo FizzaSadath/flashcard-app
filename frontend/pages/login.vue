@@ -143,7 +143,7 @@ const handleLogin = async () => {
           <h2 class="text-4xl font-bold tracking-tight mb-6 drop-shadow-lg">
             Master your memory
           </h2>
-          <p class="text-lg text-gray-100 mb-8 leading-relaxed drop-shadow-md">
+          <p class="text-lg text-gray-100 mb-8 leading-relaxed">
             Flip uses advanced algorithms to optimize your learning schedule.
             Connect the dots and retain information effortlessly.
           </p>

@@ -9,7 +9,7 @@ import (
 )
 
 func SetupTestDB(t *testing.T) *gorm.DB {
-	dsn := "host=localhost user=flash_user password=flash_password dbname=flashcard_db port=5432 sslmode=disable"
+	dsn := "host=localhost user=flash_user password=flash_password dbname=flashcard_test_db port=5432 sslmode=disable"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
