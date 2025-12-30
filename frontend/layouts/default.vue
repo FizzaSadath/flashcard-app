@@ -15,7 +15,9 @@
 
     <navbar />
 
-    <main class="flex-1 flex flex-col relative z-10">
+    <main
+      class="flex-1 w-full max-w-[1920px] mx-auto flex flex-col relative z-10"
+    >
       <slot />
     </main>
     <toast />

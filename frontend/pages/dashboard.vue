@@ -3,6 +3,8 @@ import { useAuthStore } from "~/stores/auth";
 
 const authStore = useAuthStore();
 const newDeckName = ref("");
+const showDeleteModal = ref(false);
+const deckToDelete = ref<number | null>(null);
 
 useHead({ title: "Dashboard - Flip" });
 
@@ -38,16 +40,19 @@ async function createDeck() {
   refreshAll(); // Refresh both lists
 }
 
-async function deleteDeck(id: number) {
-  if (
-    !confirm(
-      "Are you sure you want to delete this deck? All cards inside will be lost."
-    )
-  )
-    return;
+function openDeleteModal(id: number) {
+  deckToDelete.value = id;
+  showDeleteModal.value = true;
+}
 
-  await useAPI(`/decks/${id}`, { method: "DELETE" });
+async function confirmDelete() {
+  if (!deckToDelete.value) return;
+
+  await useAPI(`/decks/${deckToDelete.value}`, { method: "DELETE" });
   refreshAll();
+
+  showDeleteModal.value = false;
+  deckToDelete.value = null;
 }
 </script>
 
@@ -58,13 +63,13 @@ async function deleteDeck(id: number) {
         class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-10"
       >
         <div>
-          <h1 class="text-3xl font-bold text-white tracking-tight">My Decks</h1>
+          <h1 class="text-3xl font-bold text-white tracking-tight">
+            Welcome
+            <span>{{ authStore.user?.username || "Unknown" }}</span
+            >!
+          </h1>
           <p class="text-gray-400 mt-2 flex items-center gap-2">
-            <span class="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-            Logged in as
-            <span class="text-indigo-400 font-medium">{{
-              authStore.user?.username || "Unknown"
-            }}</span>
+            View and Manage your decks
           </p>
         </div>
       </div>
@@ -145,7 +150,7 @@ async function deleteDeck(id: number) {
                     </svg>
                   </div>
 
-                  <!-- NEW: Due Badge -->
+                  <!--Due Badge -->
                   <div
                     v-if="getDueCount(deck.ID) > 0"
                     class="flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 text-xs font-bold text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.1)]"
@@ -163,7 +168,7 @@ async function deleteDeck(id: number) {
                 </div>
 
                 <button
-                  @click="deleteDeck(deck.ID)"
+                  @click="openDeleteModal(deck.ID)"
                   class="text-gray-600 transition hover:text-red-400 p-2"
                   title="Delete Deck"
                 >
@@ -213,7 +218,7 @@ async function deleteDeck(id: number) {
                 </svg>
                 Study
 
-                <!-- NEW: Mini alert dot on button if due -->
+                <!-- Mini alert dot on study button if due -->
                 <span
                   v-if="getDueCount(deck.ID) > 0"
                   class="absolute -top-1 -right-1 flex h-3 w-3"
@@ -267,5 +272,16 @@ async function deleteDeck(id: number) {
         </div>
       </section>
     </div>
+    <modal
+      :isOpen="showDeleteModal"
+      title="Delete Deck?"
+      @close="showDeleteModal = false"
+      @confirm="confirmDelete"
+    >
+      <p>
+        Are you sure you want to delete this deck? All cards inside will be lost
+        forever. This action can't be undone.
+      </p>
+    </modal>
   </div>
 </template>
