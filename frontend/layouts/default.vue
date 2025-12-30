@@ -18,5 +18,6 @@
     <main class="flex-1 flex flex-col relative z-10">
       <slot />
     </main>
+    <toast />
   </div>
 </template>

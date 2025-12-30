@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-
+import { useToastStore } from "./toast";
 function parseJwt(token: string) {
   if (typeof window === "undefined") return null;
 
@@ -34,6 +34,7 @@ function parseJwt(token: string) {
 
 export const useAuthStore = defineStore("auth", () => {
   const token = useCookie<string | null>("token");
+  const toast = useToastStore();
 
   const user = computed(() => {
     if (!token.value) return null;
@@ -61,9 +62,11 @@ export const useAuthStore = defineStore("auth", () => {
       const response = data.value as any;
       token.value = response.token;
 
+      toast.add("Welcome back!", "success");
+
       return navigateTo("/dashboard");
     } catch (err: any) {
-      alert(err.message);
+      toast.add(err.message, "error");
     }
   }
 
@@ -88,15 +91,16 @@ export const useAuthStore = defineStore("auth", () => {
         throw new Error(error.value.data?.error || "Registration failed");
       }
 
-      alert("Registration successful! Please login.");
+      toast.add("Registration successful! Please login.", "success");
       return navigateTo("/login");
     } catch (err: any) {
-      alert(err.message);
+      toast.add(err.message, "error");
     }
   }
 
   function logout() {
     token.value = null;
+    toast.add("Logged out successfully", "info");
     return navigateTo("/login");
   }
 
