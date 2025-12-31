@@ -10,6 +10,7 @@ type CardRepository interface {
 	GetUserStats(userID uint) (*UserStats, error)
 	GetDeckStats(userID uint) ([]DeckStat, error)
 	DeleteCard(cardID, userID uint) error
+	CreateCards(cards []Card) error
 }
 
 type UserRepository interface {
