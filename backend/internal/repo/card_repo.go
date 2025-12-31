@@ -202,3 +202,22 @@ func (r *PostgresCardRepo) DeleteCard(cardID, userID uint) error {
 	}
 	return nil
 }
+
+func (r *PostgresCardRepo) CreateCards(cards []core.Card) error {
+	var entities []CardEntity
+
+	for _, c := range cards {
+		entities = append(entities, CardEntity{
+			UserID:      c.UserID,
+			DeckID:      c.DeckID,
+			Front:       c.Front,
+			Back:        c.Back,
+			Repetitions: c.Stats.Repetitions,
+			EaseFactor:  c.Stats.EaseFactor,
+			Interval:    c.Stats.Interval,
+		})
+	}
+
+	// Insert in batches of 100
+	return r.db.CreateInBatches(&entities, 100).Error
+}
