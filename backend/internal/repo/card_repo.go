@@ -189,3 +189,16 @@ func (r *PostgresCardRepo) GetDeckStats(userID uint) ([]core.DeckStat, error) {
 
 	return results, nil
 }
+
+func (r *PostgresCardRepo) DeleteCard(cardID, userID uint) error {
+	result := r.db.Where("id=? AND user_id=?", cardID, userID).Delete(&CardEntity{})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("Card not found")
+	}
+	return nil
+}
