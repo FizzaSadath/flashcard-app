@@ -1,6 +1,10 @@
 package core
 
-import "errors"
+import (
+	"encoding/csv"
+	"errors"
+	"io"
+)
 
 type CardService struct {
 	repo     CardRepository
@@ -67,4 +71,58 @@ func (s *CardService) GetDeckStats(userID uint) ([]DeckStat, error) {
 }
 func (s *CardService) DeleteCard(userID uint, cardID uint) error {
 	return s.repo.DeleteCard(cardID, userID)
+}
+
+func (s *CardService) ImportCards(userID uint, deckID uint, file io.Reader) (int, error) {
+	deck, err := s.deckRepo.GetDeckByID(deckID)
+	if err != nil {
+		return 0, err
+	}
+	if deck.UserID != userID {
+		return 0, errors.New("unauthorized")
+	}
+
+	reader := csv.NewReader(file)
+	reader.LazyQuotes = true // Helps with messy quotes
+
+	var cards []Card
+	lineCount := 0
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return 0, err
+		}
+
+		if lineCount == 0 && (record[0] == "Front" || record[0] == "front") {
+			lineCount++
+			continue
+		}
+
+		if len(record) < 2 {
+			continue
+		}
+
+		cards = append(cards, Card{
+			UserID: userID,
+			DeckID: deckID,
+			Front:  record[0],
+			Back:   record[1],
+			Stats:  InitialStats(),
+		})
+		lineCount++
+	}
+
+	if len(cards) == 0 {
+		return 0, errors.New("no valid cards found in CSV")
+	}
+
+	if err := s.repo.CreateCards(cards); err != nil {
+		return 0, err
+	}
+
+	return len(cards), nil
 }

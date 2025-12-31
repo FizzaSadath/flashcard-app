@@ -47,6 +47,7 @@ func SetupRouter(cardHandler *CardHandler, authHandler *AuthHandler, deckHandler
 			protected.GET("/stats", cardHandler.GetStats)
 			protected.GET("/stats/decks", cardHandler.GetDeckStats)
 			protected.DELETE("/cards/:id", cardHandler.DeleteCard)
+			protected.POST("/decks/:id/import", cardHandler.UploadCSV)
 		}
 	}
 

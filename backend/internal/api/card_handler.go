@@ -124,3 +124,35 @@ func (h *CardHandler) DeleteCard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Card deleted"})
 }
+
+func (h *CardHandler) UploadCSV(c *gin.Context) {
+	deckIDStr := c.Param("id")
+	id64, err := strconv.ParseUint(deckIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid deck ID"})
+		return
+	}
+
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
+		return
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
+		return
+	}
+	defer file.Close()
+
+	userID := getUserID(c)
+
+	count, err := h.service.ImportCards(userID, uint(id64), file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Import successful", "count": count})
+}
