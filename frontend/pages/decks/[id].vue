@@ -2,11 +2,15 @@
 const route = useRoute();
 const deckId = Number(route.params.id);
 
+// Form State
 const front = ref("");
 const back = ref("");
 
-useHead({ title: "My Decks - Flip" });
+// --- DELETE MODAL STATE ---
+const showDeleteModal = ref(false);
+const cardToDelete = ref<number | null>(null);
 
+// Data Fetching
 const { data: decks } = await useAPI<any[]>("/decks");
 const currentDeck = computed(() =>
   decks.value?.find((d: any) => d.ID === deckId)
@@ -19,6 +23,7 @@ const deckCards = computed(() => {
   return allCards.value.filter((c: any) => c.DeckID === deckId);
 });
 
+// Create Logic
 async function createCard() {
   if (!front.value || !back.value) return;
 
@@ -34,6 +39,26 @@ async function createCard() {
   front.value = "";
   back.value = "";
   refreshCards();
+}
+
+// --- DELETE LOGIC ---
+
+// 1. User clicks Trash Icon
+function openDeleteModal(id: number) {
+  cardToDelete.value = id;
+  showDeleteModal.value = true;
+}
+
+// 2. User clicks "Delete" in Modal
+async function confirmDelete() {
+  if (!cardToDelete.value) return;
+
+  await useAPI(`/cards/${cardToDelete.value}`, { method: "DELETE" });
+
+  // Refresh and Close
+  refreshCards();
+  showDeleteModal.value = false;
+  cardToDelete.value = null;
 }
 </script>
 
@@ -84,7 +109,6 @@ async function createCard() {
         <div
           class="relative overflow-hidden rounded-2xl border border-white/10 bg-gray-900/50 p-6 sm:p-8 shadow-2xl backdrop-blur-xl"
         >
-          <!-- Glow Effect -->
           <div
             class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-500/10 blur-3xl"
           ></div>
@@ -111,7 +135,6 @@ async function createCard() {
 
           <form @submit.prevent="createCard" class="relative space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Front Input -->
               <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-300"
                   >Front (Question)</label
@@ -125,7 +148,6 @@ async function createCard() {
                 />
               </div>
 
-              <!-- Back Input -->
               <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-300"
                   >Back (Answer)</label
@@ -157,14 +179,33 @@ async function createCard() {
         <h2 class="text-xl font-bold text-white mb-6">Cards in this Deck</h2>
 
         <div v-if="deckCards.length > 0" class="space-y-4">
-          <!-- Card Row (Flexbox instead of Table for better styling) -->
           <div
             v-for="card in deckCards"
             :key="card.ID"
-            class="group flex flex-col md:flex-row md:items-center gap-4 rounded-xl border border-white/5 bg-gray-800/30 p-4 hover:bg-gray-800/50 transition-colors"
+            class="group flex flex-col md:flex-row md:items-center gap-4 rounded-xl border border-white/5 bg-gray-800/30 p-4 hover:bg-gray-800/50 transition-colors relative"
           >
+            <!-- DELETE BUTTON (Opens Modal) -->
+            <button
+              @click="openDeleteModal(card.ID)"
+              class="absolute top-2 right-2 p-2 text-gray-600 hover:text-red-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+              title="Delete Card"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 001.5.06l.3-7.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
             <!-- Content -->
-            <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 pr-8">
               <div class="flex flex-col gap-1">
                 <span
                   class="text-xs uppercase tracking-wide text-gray-500 font-bold"
@@ -172,7 +213,6 @@ async function createCard() {
                 >
                 <p class="text-white font-medium">{{ card.Front }}</p>
               </div>
-
               <div class="flex flex-col gap-1">
                 <span
                   class="text-xs uppercase tracking-wide text-gray-500 font-bold"
@@ -182,12 +222,12 @@ async function createCard() {
               </div>
             </div>
 
-            <!-- Stats Badge -->
+            <!-- Stats -->
             <div
               class="flex items-center gap-4 md:border-l md:border-gray-700 md:pl-6 min-w-[140px]"
             >
               <div class="flex flex-col">
-                <span class="text-xs text-gray-500">Streak</span>
+                <span class="text-xs text-gray-500">Repetitions</span>
                 <span class="font-mono text-indigo-400 font-bold">{{
                   card.Stats.Repetitions
                 }}</span>
@@ -232,5 +272,18 @@ async function createCard() {
         </div>
       </section>
     </div>
+
+    <!-- THE REUSABLE MODAL -->
+    <modal
+      :isOpen="showDeleteModal"
+      title="Delete Card?"
+      @close="showDeleteModal = false"
+      @confirm="confirmDelete"
+    >
+      <p class="text-gray-300">
+        Are you sure you want to delete this card? <br />This action cannot be
+        undone.
+      </p>
+    </modal>
   </div>
 </template>
