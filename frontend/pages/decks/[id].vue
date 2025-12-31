@@ -2,15 +2,12 @@
 const route = useRoute();
 const deckId = Number(route.params.id);
 
-// Form State
 const front = ref("");
 const back = ref("");
 
-// --- DELETE MODAL STATE ---
 const showDeleteModal = ref(false);
 const cardToDelete = ref<number | null>(null);
 
-// Data Fetching
 const { data: decks } = await useAPI<any[]>("/decks");
 const currentDeck = computed(() =>
   decks.value?.find((d: any) => d.ID === deckId)
@@ -23,7 +20,6 @@ const deckCards = computed(() => {
   return allCards.value.filter((c: any) => c.DeckID === deckId);
 });
 
-// Create Logic
 async function createCard() {
   if (!front.value || !back.value) return;
 
@@ -41,21 +37,16 @@ async function createCard() {
   refreshCards();
 }
 
-// --- DELETE LOGIC ---
-
-// 1. User clicks Trash Icon
 function openDeleteModal(id: number) {
   cardToDelete.value = id;
   showDeleteModal.value = true;
 }
 
-// 2. User clicks "Delete" in Modal
 async function confirmDelete() {
   if (!cardToDelete.value) return;
 
   await useAPI(`/cards/${cardToDelete.value}`, { method: "DELETE" });
 
-  // Refresh and Close
   refreshCards();
   showDeleteModal.value = false;
   cardToDelete.value = null;
@@ -65,7 +56,6 @@ async function confirmDelete() {
 <template>
   <div class="min-h-[calc(100vh-6rem)] p-6 sm:p-10">
     <div class="mx-auto max-w-5xl">
-      <!-- NAVIGATION -->
       <NuxtLink
         to="/dashboard"
         class="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors mb-8 group"
@@ -85,7 +75,6 @@ async function confirmDelete() {
         Back to Dashboard
       </NuxtLink>
 
-      <!-- HEADER -->
       <div
         class="flex items-end justify-between mb-10 border-b border-gray-800 pb-6"
       >
@@ -104,7 +93,6 @@ async function confirmDelete() {
         </div>
       </div>
 
-      <!-- CREATE CARD FORM -->
       <section class="mb-12">
         <div
           class="relative overflow-hidden rounded-2xl border border-white/10 bg-gray-900/50 p-6 sm:p-8 shadow-2xl backdrop-blur-xl"
@@ -174,7 +162,6 @@ async function confirmDelete() {
         </div>
       </section>
 
-      <!-- CARD LIST -->
       <section>
         <h2 class="text-xl font-bold text-white mb-6">Cards in this Deck</h2>
 
@@ -184,7 +171,6 @@ async function confirmDelete() {
             :key="card.ID"
             class="group flex flex-col md:flex-row md:items-center gap-4 rounded-xl border border-white/5 bg-gray-800/30 p-4 hover:bg-gray-800/50 transition-colors relative"
           >
-            <!-- DELETE BUTTON (Opens Modal) -->
             <button
               @click="openDeleteModal(card.ID)"
               class="absolute top-2 right-2 p-2 text-gray-600 hover:text-red-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
@@ -204,7 +190,6 @@ async function confirmDelete() {
               </svg>
             </button>
 
-            <!-- Content -->
             <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 pr-8">
               <div class="flex flex-col gap-1">
                 <span
@@ -222,7 +207,6 @@ async function confirmDelete() {
               </div>
             </div>
 
-            <!-- Stats -->
             <div
               class="flex items-center gap-4 md:border-l md:border-gray-700 md:pl-6 min-w-[140px]"
             >
@@ -273,7 +257,6 @@ async function confirmDelete() {
       </section>
     </div>
 
-    <!-- THE REUSABLE MODAL -->
     <modal
       :isOpen="showDeleteModal"
       title="Delete Card?"
