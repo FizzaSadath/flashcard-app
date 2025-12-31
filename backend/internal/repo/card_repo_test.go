@@ -285,3 +285,62 @@ func TestGetDeckStats(t *testing.T) {
 		t.Errorf("Deck2: Expected Total 0, got %d", d2.Total)
 	}
 }
+
+func TestDeleteCard(t *testing.T) {
+	db := SetupTestDB(t)
+	repo := NewCardRepo(db)
+
+	userA := createTestUser(db)
+	deckA := createTestDeck(db, userA)
+
+	userBEntity := UserEntity{
+		Email:    "hacker@test.com",
+		Username: "hacker",
+		Password: "hashedpassword",
+	}
+	if err := db.Create(&userBEntity).Error; err != nil {
+		t.Fatalf("Failed to create manual user B: %v", err)
+	}
+	userB := userBEntity.ID
+
+	card := &core.Card{
+		UserID: userA,
+		DeckID: deckA,
+		Front:  "Delete Me",
+		Back:   "...",
+		Stats:  core.InitialStats(),
+	}
+	if err := repo.CreateCard(card); err != nil {
+		t.Fatalf("Failed to create card: %v", err)
+	}
+
+	// User B tries to delete User A's card
+	err := repo.DeleteCard(card.ID, userB)
+	if err == nil {
+		t.Error("Expected error when User B deletes User A's card, got nil")
+	}
+
+	// Verify card still exists
+	_, err = repo.GetCardByID(card.ID)
+	if err != nil {
+		t.Error("Card should still exist after unauthorized delete attempt")
+	}
+
+	// User A deletes their own card
+	err = repo.DeleteCard(card.ID, userA)
+	if err != nil {
+		t.Fatalf("Failed to delete card: %v", err)
+	}
+
+	// Verify card is actually gone
+	_, err = repo.GetCardByID(card.ID)
+	if err == nil {
+		t.Error("Card should be deleted, but GetCardByID found it")
+	}
+
+	// Delete Non-Existent Card ---
+	err = repo.DeleteCard(9999, userA)
+	if err == nil {
+		t.Error("Expected error when deleting non-existent card, got nil")
+	}
+}
