@@ -338,9 +338,57 @@ func TestDeleteCard(t *testing.T) {
 		t.Error("Card should be deleted, but GetCardByID found it")
 	}
 
-	// Delete Non-Existent Card ---
+	// Delete Non-Existent Card
 	err = repo.DeleteCard(9999, userA)
 	if err == nil {
 		t.Error("Expected error when deleting non-existent card, got nil")
+	}
+}
+func TestCreateCards_Batch(t *testing.T) {
+	db := SetupTestDB(t)
+	repo := NewCardRepo(db)
+
+	userID := createTestUser(db)
+	deckID := createTestDeck(db, userID)
+
+	var cardsToCreate []core.Card
+
+	for i := 1; i <= 5; i++ {
+		frontText := "Front " + string(rune('A'+i))
+
+		cardsToCreate = append(cardsToCreate, core.Card{
+			UserID: userID,
+			DeckID: deckID,
+			Front:  frontText,
+			Back:   "Back Value",
+			Stats:  core.InitialStats(),
+		})
+	}
+
+	err := repo.CreateCards(cardsToCreate)
+	if err != nil {
+		t.Fatalf("CreateCards failed: %v", err)
+	}
+
+	savedCards, err := repo.ListCards(userID)
+	if err != nil {
+		t.Fatalf("Failed to list cards: %v", err)
+	}
+
+	if len(savedCards) != 5 {
+		t.Errorf("Expected 5 cards to be saved, got %d", len(savedCards))
+	}
+
+	firstCard := savedCards[0]
+
+	if firstCard.DeckID != deckID {
+		t.Errorf("Card DeckID mismatch. Got %d, want %d", firstCard.DeckID, deckID)
+	}
+	if firstCard.UserID != userID {
+		t.Errorf("Card UserID mismatch. Got %d, want %d", firstCard.UserID, userID)
+	}
+
+	if firstCard.Stats.EaseFactor != 2.5 {
+		t.Errorf("Card Stats not saved correctly. Got EF %f", firstCard.Stats.EaseFactor)
 	}
 }
