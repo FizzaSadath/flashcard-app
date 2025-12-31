@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useToastStore } from "~/stores/toast";
+
+const toast = useToastStore();
+
 const route = useRoute();
 const deckId = Number(route.params.id);
 
@@ -19,6 +23,9 @@ const deckCards = computed(() => {
   if (!allCards.value) return [];
   return allCards.value.filter((c: any) => c.DeckID === deckId);
 });
+
+const fileInput = ref<HTMLInputElement | null>(null);
+const isImporting = ref(false);
 
 async function createCard() {
   if (!front.value || !back.value) return;
@@ -50,6 +57,40 @@ async function confirmDelete() {
   refreshCards();
   showDeleteModal.value = false;
   cardToDelete.value = null;
+}
+
+async function handleFileUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+
+  if (!input.files || input.files.length === 0) return;
+
+  const file = input.files[0];
+
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  isImporting.value = true;
+  try {
+    await useAPI(`/decks/${deckId}/import`, {
+      method: "POST",
+      body: formData,
+    });
+
+    refreshCards();
+    toast.add("Cards imported successfully!", "success");
+  } catch (error) {
+    toast.add("Failed to import CSV. Check file format.", "error");
+  } finally {
+    isImporting.value = false;
+    input.value = "";
+  }
+}
+
+// Helper to click the hidden input
+function triggerFileInput() {
+  fileInput.value?.click();
 }
 </script>
 
@@ -120,7 +161,37 @@ async function confirmDelete() {
             </svg>
             Add New Card
           </h2>
+          <div class="flex justify-end mb-4">
+            <input
+              type="file"
+              ref="fileInput"
+              class="hidden"
+              accept=".csv"
+              @change="handleFileUpload"
+            />
 
+            <button
+              @click="triggerFileInput"
+              :disabled="isImporting"
+              class="flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-bold text-gray-300 hover:bg-gray-700 hover:text-white transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                />
+              </svg>
+              {{ isImporting ? "Importing..." : "Import CSV" }}
+            </button>
+          </div>
           <form @submit.prevent="createCard" class="relative space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-2">
@@ -264,7 +335,7 @@ async function confirmDelete() {
       @confirm="confirmDelete"
     >
       <p class="text-gray-300">
-        Are you sure you want to delete this card? <br />This action cannot be
+        Are you sure you want to delete this card? <br />This action can't be
         undone.
       </p>
     </modal>
