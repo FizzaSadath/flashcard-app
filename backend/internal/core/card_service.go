@@ -65,3 +65,6 @@ func (s *CardService) GetStats(userID uint) (*UserStats, error) {
 func (s *CardService) GetDeckStats(userID uint) ([]DeckStat, error) {
 	return s.repo.GetDeckStats(userID)
 }
+func (s *CardService) DeleteCard(userID uint, cardID uint) error {
+	return s.repo.DeleteCard(cardID, userID)
+}

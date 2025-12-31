@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/FizzaSadath/flashcard-app-backend/internal/core"
 	"github.com/gin-gonic/gin"
@@ -106,4 +107,20 @@ func (h *CardHandler) GetDeckStats(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, stats)
+}
+
+func (h *CardHandler) DeleteCard(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseUint(idStr, 10, 32)
+	cardID := uint(id)
+
+	userID := getUserID(c)
+
+	err := h.service.DeleteCard(userID, cardID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Card not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Card deleted"})
 }
