@@ -45,6 +45,7 @@ services:
       - /app/node_modules
     environment:
       NUXT_PUBLIC_API_BASE: /api
+      NUXT_API_SECRET: http://backend:8080/api
     networks:
       - flashcard_net
 

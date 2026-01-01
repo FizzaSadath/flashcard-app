@@ -63,29 +63,36 @@ async function handleFileUpload(event: Event) {
   const input = event.target as HTMLInputElement;
 
   if (!input.files || input.files.length === 0) return;
-
   const file = input.files[0];
-
   if (!file) return;
 
   const formData = new FormData();
   formData.append("file", file);
 
   isImporting.value = true;
-  try {
-    await useAPI(`/decks/${deckId}/import`, {
-      method: "POST",
-      body: formData,
-    });
 
-    refreshCards();
-    toast.add("Cards imported successfully!", "success");
-  } catch (error) {
-    toast.add("Failed to import CSV. Check file format.", "error");
-  } finally {
-    isImporting.value = false;
-    input.value = "";
+  const { data, error } = await useAPI<any>(`/decks/${deckId}/import`, {
+    method: "POST",
+    body: formData,
+  });
+
+  isImporting.value = false;
+  input.value = "";
+
+  if (error.value) {
+    const errorMsg =
+      error.value.data?.error || "Import failed. Check file format.";
+    toast.add(errorMsg, "error");
+    return;
   }
+
+  if (data.value && data.value.count === 0) {
+    toast.add("No cards found in CSV. Check headers.", "error");
+    return;
+  }
+
+  refreshCards();
+  toast.add(`Imported ${data.value?.count} cards successfully!`, "success");
 }
 
 // Helper to click the hidden input

@@ -8,8 +8,9 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   runtimeConfig: {
+    apisecret: "",
     public: {
-      apiBase: "http://localhost:8080/api",
+      apiBase: "/api",
     },
   },
 

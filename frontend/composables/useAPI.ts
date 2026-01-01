@@ -4,8 +4,10 @@ export const useAPI = <T>(url: string, options: any = {}) => {
   const config = useRuntimeConfig();
   const authStore = useAuthStore();
 
+  const baseURL = import.meta.server ? config.apiSecret : config.public.apiBase;
+
   const defaults = {
-    baseURL: config.public.apiBase,
+    baseURL: baseURL,
     headers: authStore.token
       ? { Authorization: `Bearer ${authStore.token}` }
       : {},
