@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useToastStore } from "~/stores/toast";
 
+useHead({ title: "Dashboard - Flip" });
+
 const toast = useToastStore();
 
 const route = useRoute();
@@ -78,7 +80,6 @@ async function handleFileUpload(event: Event) {
 
   isImporting.value = false;
   input.value = "";
-
   if (error.value) {
     const errorMsg =
       error.value.data?.error || "Import failed. Check file format.";
@@ -289,7 +290,7 @@ function triggerFileInput() {
               class="flex items-center gap-4 md:border-l md:border-gray-700 md:pl-6 min-w-[140px]"
             >
               <div class="flex flex-col">
-                <span class="text-xs text-gray-500">Repetitions</span>
+                <span class="text-xs text-gray-500">Streak</span>
                 <span class="font-mono text-indigo-400 font-bold">{{
                   card.Stats.Repetitions
                 }}</span>

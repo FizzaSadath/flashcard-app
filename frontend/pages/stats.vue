@@ -2,6 +2,7 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "vue-chartjs";
 
+useHead({ title: "Stats - Flip" });
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 // 1. Fetch both Global stats and Deck breakdown
