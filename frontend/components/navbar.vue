@@ -25,9 +25,8 @@ function closeMobileMenu() {
     <div
       class="mx-auto flex h-24 w-full max-w-[1920px] items-center justify-between px-6 lg:px-8"
     >
-      <NuxtLink
-        to="/"
-        class="flex items-center gap-4 group"
+      <div
+        class="flex items-center gap-4 group cursor-default"
         @click="closeMobileMenu"
       >
         <img
@@ -40,7 +39,7 @@ function closeMobileMenu() {
         >
           Flip
         </span>
-      </NuxtLink>
+      </div>
 
       <div class="hidden md:flex md:items-center md:gap-8 lg:gap-10">
         <template v-if="!authStore.isAuthenticated">

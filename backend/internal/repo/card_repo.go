@@ -69,7 +69,7 @@ func (r *PostgresCardRepo) ListDueCards(userID uint, limit int) ([]core.Card, er
 	var entities []CardEntity
 
 	query := r.db.Where("user_id = ?", userID).
-		Where("updated_at + make_interval(days => \"interval\"::int) <= NOW()")
+		Where("updated_at::date + make_interval(days => \"interval\"::int) <= CURRENT_DATE")
 	result := query.Order("updated_at ASC").Limit(limit).Find(&entities)
 
 	if result.Error != nil {
@@ -147,7 +147,7 @@ func (r *PostgresCardRepo) GetUserStats(userID uint) (*core.UserStats, error) {
 
 	//  Due Cards
 	if err := r.db.Model(&CardEntity{}).Where("user_id = ?", userID).
-		Where("updated_at + make_interval(days => \"interval\"::int) <= NOW()").
+		Where("updated_at::date + make_interval(days => \"interval\"::int) <= CURRENT_DATE").
 		Count(&stats.CardsDue).Error; err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func (r *PostgresCardRepo) GetDeckStats(userID uint) ([]core.DeckStat, error) {
 			d.id as deck_id,
 			d.name as deck_name,
 			COUNT(c.id) as total,
-			SUM(CASE WHEN c.updated_at + make_interval(days => c.interval::int) <= NOW() THEN 1 ELSE 0 END) as due,
+			SUM(CASE WHEN c.updated_at::date + make_interval(days => c.interval::int) <= CURRENT_DATE THEN 1 ELSE 0 END) as due,
 			SUM(CASE WHEN c.interval = 0 THEN 1 ELSE 0 END) as new,
 			SUM(CASE WHEN c.interval > 0 AND c.interval <= 21 THEN 1 ELSE 0 END) as learning,
 			SUM(CASE WHEN c.interval > 21 THEN 1 ELSE 0 END) as mature
