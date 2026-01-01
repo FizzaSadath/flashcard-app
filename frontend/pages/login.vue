@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 
+useHead({ title: "Login - Flip" });
+
 const email = ref("");
 const password = ref("");
 const authStore = useAuthStore();
 const loading = ref(false);
-
-useHead({ title: "Login - Flip" });
 
 const handleLogin = async () => {
   loading.value = true;

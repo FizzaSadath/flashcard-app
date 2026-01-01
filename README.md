@@ -1,71 +1,86 @@
-Flashcard Study App
+Flip - Spaced Repetition Flashcard App
 
-- Create card decks
-- spaced repetition algorithm
-- progress tracking
-- statistics
+Flip is a Test Driven Full-Stack web application designed to help users learn and retain information effortlessly using the SuperMemo-2 (SM-2) Spaced Repetition algorithm.
 
-SM-2 Algorithm (Super Memo 2)
+Tech Stack
+    Backend
+        - Language: Go 1.24
+        - Framework: Gin 
+        - Database: PostgreSQL
+        - ORM: GORM
+        - Auth: JWT & Bcrypt
+    Frontend
+        - Framework: Nuxt 4 (Vue.js)
+        - Styling: Tailwind CSS
+        - State Management: Pinia
+        - Visualization: Chart.js
+    Infrastructure
+       - Containerization: Docker & Docker Compose
+        - Gateway: Nginx 
 
-Variables:
-1. Repetitions (n): The "Streak." How many times in a row you have successfully recalled the card.
-2. Interval (I): The "Wait Time." How many days until you need to see the card again.
-3. Ease Factor (EF): The "Multiplier." A number that represents how easy this specific card is.
-    Standard start value: 2.5
-    Minimum value: 1.3 (It never gets harder than this).
+Features
+    - Secure Authentication: Login/Registration system with JWT cookies and password hashing.
+    - Deck Management: Create, rename, and delete decks to organize your studies.
+    - Spaced Repetition (SM-2): An algorithm that schedules reviews based on your performance.
+    - CSV Import: Bulk import flashcards from other CSV files.
+    - Statistics: Visual breakdown of your learning progress (New vs. Mature cards) and daily due counts.
 
-Grading Scale (user input):
+Getting Started
+    Follow these steps to get this app running on your machine
 
-5: Perfect response.
-4: Correct response after a hesitation.
-3: Correct response recalled with serious difficulty.
-2: Incorrect response (but you were close).
-1: Incorrect response (the correct answer feels familiar).
-0: Complete blackout.
-
-Logic:
-
-1. Handle the Interval (The Wait Time)
-    If you Fail (grade < 3):
-    You forgot it. We must reset.
-        New Interval: 1 day (Review it tomorrow).
-        New Repetitions: 0 (Streak broken).
-    If you Succeed (grade >= 3):
-        Your memory is getting stronger.
-        If Repetitions = 0: New Interval = 1 day.
-        If Repetitions = 1: New Interval = 6 days.
-        If Repetitions > 1: New Interval = Previous Interval × Ease Factor.
-
-2. Update Ease Factor
-    If you got a 5, the EF goes UP (next interval will be much wider).
-    If you got a 3, the EF goes DOWN (next interval will grow slowly).
-    If you got a 0, the EF drops significantly (but never below 1.3).
-
-Pseudo code:
-
-FUNCTION CalculateReview(current_reps, current_interval, current_ef, user_grade):
-
-    IF user_grade < 3 THEN
-        new_reps = 0
-        new_interval = 1
+    Prequisites
+        - Docker Desktop
+        - Git
     
-    ELSE
-        new_reps = current_reps + 1
+    Clone the Repository
+        Run the following commands:
+            - git clone https://github.com/FizzaSadath/flashcard-app.git
+            - cd flashcard-app
 
-        IF new_reps == 1 THEN
-            new_interval = 1
-        ELSE IF new_reps == 2 THEN
-            new_interval = 6
-        ELSE
-            new_interval = RoundUp(current_interval * current_ef)
-        END IF
-    END IF
+    Configure Environments:
+        - Create .env file in the root directory and paste these contents
+
+            DB_HOST=db
+            DB_PORT=5432
+            DB_USER=flash_user
+            DB_PASSWORD=flash_password
+            DB_NAME=flashcard_db
+            # Security (Change this to a random string)
+            JWT_SECRET=super-secret-key-change-me
+        
+    Build & Run
+        Run the following command:
+            - docker compose up --build
+
+    Access the App
+        - Frontend: http://localhost
+        - Backend: http://localhost/api/ping
+
+How to Use
+    1. Create an Account: Click Sign Up to create a new user. 
+    2. Create a Deck: Go to the Dashboard and type a topic (e.g., "Web Development") to create a deck.
+    3. Add Cards: 
+        - Manual: Fill in the front/back and click on "Add Card"
+        - Import: Use the Import CSV button. The CSV format must be:
+
+            Front,Back
+            What is Docker?,A containerization platform.
+            What is a Goroutine?,A lightweight thread managed by the Go runtime.
+
+    4. Study Mode: 
+        Click Study on a deck. The app will show you cards that are "Due" today.
+        When you reveal the answer, grade yourself:
+            - 0-2 (Fail): You forgot. The card will reset to Day 1.
+            - 3 (Hard): You remembered with effort.
+            - 4 (Good): You remembered comfortably.
+            - 5 (Easy): Instant recall. The interval will increase aggressively.
     
-    change_in_ef = (0.1 - (5 - user_grade) * (0.08 + (5 - user_grade) * 0.02))
-    new_ef = current_ef + change_in_ef
+    5. View Cards:
+        Click Cards on a deck. The app will show you the cards in this deck including your streak, and when to review the card next.
 
-    IF new_ef < 1.3 THEN
-        new_ef = 1.3
-    END IF
+    6. View Stats
+        Go to Stats section in the dashboard. View global card statistics as well as the deck-wise breakdown of new, learning and mature cards.
+    
 
-    RETURN new_reps, new_interval, new_ef
+    Feel free to reach out to share your suggestions and ideas.
+
