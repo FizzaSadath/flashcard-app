@@ -117,6 +117,19 @@ When reviewing a card, grade yourself honestly to optimize the algorithm:
 
 ---
 
+### View Statistics
+You can view your statistics by clicking stats on the navbar
+*   Cards are classified as **new** (interval = 0), **learning** (interval > 0 & < 21) and **mature** (interval>21). 
+*   You can view global count of new, learning and mature cards.
+*   You can also view deck-wise breakdown of the three types of cards.
+
+### View Streaks and Interval
+*   You can view how the interval pushes far apart when your streak increases.
+*   To view them, click on cards of a particular deck.
+
+
+---
+
 ## 🧪 Running Tests
 
 To run the backend integration tests (requires Go installed locally):
