@@ -52,10 +52,10 @@ graph TD
 
 ## 🚀 Getting Started
 
-Follow these steps to get the app running locally in minutes.
+Follow these steps to get the app running on your machine.
 
 ### Prerequisites
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Installed and Running)
+*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) 
 *   Git
 
 ### 1. Clone the Repository
@@ -80,7 +80,7 @@ JWT_SECRET=super-secret-key-change-me
 ```
 
 ### 3. Build & Run
-Run the following command to download dependencies, build images, and start the containers:
+Run the following command to build images and start the containers.
 
 ```bash
 docker compose up --build
@@ -141,8 +141,11 @@ To run the backend integration tests (requires Go installed locally):
 
 **2. Port 80 is already in use**
 *   If you have another server running (like Apache), open `docker-compose.yml` and change the Nginx ports to `"8080:80"`. Access the app at `http://localhost:8080`.
-
-**3. "Changes not showing up"**
+  
+**3. Bind for 0.0.0.0:5432 failed: port is already allocated**
+*   If you have already have postgres running on your computer, open `docker-compose.yml` and change the db ports to `"5433:5432"`(or another unused port if 5433 is also taken).
+  
+**4. "Changes not showing up"**
 *   The frontend uses Hot Reloading (HMR), so changes appear instantly.
 *   If you change Go code, you must restart the backend container: `docker compose restart backend`.
 
