@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
+import { useToastStore } from "~/stores/toast";
 
 const email = ref("");
 const username = ref("");
@@ -7,10 +8,19 @@ const password = ref("");
 const confirmPassword = ref("");
 const authStore = useAuthStore();
 const loading = ref(false);
+const toast = useToastStore();
 
 useHead({ title: "Register - Flip" });
 
 const handleRegister = async () => {
+  if (username.value.length < 3) {
+    toast.add("Username must be at least 3 characters", "error");
+    return;
+  }
+  if (password.value.length < 6) {
+    toast.add("Password must be at least 6 characters", "error");
+    return;
+  }
   loading.value = true;
   await authStore.register(
     email.value,
