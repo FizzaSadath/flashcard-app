@@ -54,8 +54,8 @@ func (s *CardService) ReviewCard(userID uint, cardID uint, grade int) error {
 	return s.repo.UpdateCard(card)
 }
 
-func (s *CardService) ListDueCards(userID uint, limit int) ([]Card, error) {
-	return s.repo.ListDueCards(userID, limit)
+func (s *CardService) ListDueCards(userID uint, deckID uint, limit int) ([]Card, error) {
+	return s.repo.ListDueCards(userID, deckID, limit)
 }
 
 func (s *CardService) ListCards(userID uint) ([]Card, error) {

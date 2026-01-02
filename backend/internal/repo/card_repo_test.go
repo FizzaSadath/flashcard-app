@@ -98,13 +98,14 @@ func TestListDueCards(t *testing.T) {
 
 	futureCard := &core.Card{
 		UserID: userID,
+		DeckID: deckID,
 		Front:  "Future Card",
 		Back:   "Answer",
 		Stats:  core.CardStats{Interval: 100, Repetitions: 5, EaseFactor: 2.5},
 	}
 	repo.CreateCard(futureCard)
 
-	dueCards, err := repo.ListDueCards(userID, 10)
+	dueCards, err := repo.ListDueCards(userID, deckID, 10)
 	if err != nil {
 		t.Fatalf("Failed to list cards: %v", err)
 	}

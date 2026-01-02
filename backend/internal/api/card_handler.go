@@ -80,7 +80,14 @@ func (h *CardHandler) ReviewCard(c *gin.Context) {
 func (h *CardHandler) ListDueCards(c *gin.Context) {
 	userID := getUserID(c)
 
-	cards, err := h.service.ListDueCards(userID, 10)
+	deckIDStr := c.Query("deck_id")
+	var deckID uint
+	if deckIDStr != "" {
+		id, _ := strconv.Atoi(deckIDStr)
+		deckID = uint(id)
+	}
+
+	cards, err := h.service.ListDueCards(userID, deckID, 10)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch due cards"})
 		return

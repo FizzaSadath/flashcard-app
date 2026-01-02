@@ -4,7 +4,7 @@ package core
 type CardRepository interface {
 	CreateCard(card *Card) error
 	GetCardByID(id uint) (*Card, error)
-	ListDueCards(userID uint, limit int) ([]Card, error)
+	ListDueCards(userID uint, deckID uint, limit int) ([]Card, error)
 	ListCards(userID uint) ([]Card, error)
 	UpdateCard(card *Card) error
 	GetUserStats(userID uint) (*UserStats, error)

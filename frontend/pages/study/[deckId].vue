@@ -5,13 +5,12 @@ const deckId = Number(route.params.deckId);
 
 useHead({ title: "Study - Flip" });
 
-// Fetch all due cards
-const { data: dueCards, pending } = await useAPI<any[]>("/cards/due");
+const { data: dueCards, pending } = await useAPI<any[]>(
+  `/cards/due?deck_id=${deckId}`
+);
 
-// Filter for current deck
 const queue = computed(() => {
-  if (!dueCards.value) return [];
-  return dueCards.value.filter((c: any) => c.DeckID === deckId);
+  return dueCards.value || [];
 });
 
 const currentIndex = ref(0);

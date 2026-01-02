@@ -65,11 +65,15 @@ func (r *PostgresCardRepo) GetCardByID(id uint) (*core.Card, error) {
 
 	return card, nil
 }
-func (r *PostgresCardRepo) ListDueCards(userID uint, limit int) ([]core.Card, error) {
+func (r *PostgresCardRepo) ListDueCards(userID uint, deckID uint, limit int) ([]core.Card, error) {
 	var entities []CardEntity
 
 	query := r.db.Where("user_id = ?", userID).
 		Where("updated_at::date + make_interval(days => \"interval\"::int) <= CURRENT_DATE")
+	if deckID != 0 {
+		query = query.Where("deck_id = ?", deckID)
+	}
+
 	result := query.Order("updated_at ASC").Limit(limit).Find(&entities)
 
 	if result.Error != nil {
